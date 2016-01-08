@@ -39,19 +39,13 @@ void readDeadHotFromDB()
 
   int nruns = runNumber.size();
 
+  TFile *outfile = TFile::Open("rundep.root","RECREATE");
+
   // TH1F *B2_good = new TH1F("B2_good","B2_good",nruns,runNumber[0]-0.5,runNumber[nruns-1]-0.5);
   // TH1F *B3_good = new TH1F("B3_good","B3_good",nruns,runNumber[0]-0.5,runNumber[nruns-1]-0.5);
   TH1F *B2_good = new TH1F("B2_good","B2_good",nruns,runNumberIndex[0]-0.5,runNumberIndex[nruns-1]-0.5);
   TH1F *B3_good = new TH1F("B3_good","B3_good",nruns,runNumberIndex[0]-0.5,runNumberIndex[nruns-1]-0.5);
 
-  // ---
-  TH2F *th2f_x1deadmap_B2_West = new TH2F("th2f_x1deadmap_B2_West","",5,-0.5,4.5,8,-0.5,7.5);
-  TH2F *th2f_x1deadmap_B2_East = new TH2F("th2f_x1deadmap_B2_East","",5,-0.5,4.5,8,8.5,15.5);
-  // ---
-  TH2F *th2f_x2deadmap_B2_West = new TH2F("th2f_x2deadmap_B2_West","",5,-0.5,4.5,8,-0.5,7.5);
-  TH2F *th2f_x2deadmap_B2_East = new TH2F("th2f_x2deadmap_B2_East","",5,-0.5,4.5,8,8.5,15.5);
-  TH2F *th2f_x2fullmap_B2_West = new TH2F("th2f_x2fullmap_B2_West","",5,-0.5,4.5,8,-0.5,7.5);
-  TH2F *th2f_x2fullmap_B2_East = new TH2F("th2f_x2fullmap_B2_East","",5,-0.5,4.5,8,8.5,15.5);
 
 
 
@@ -87,6 +81,16 @@ void readDeadHotFromDB()
       int B2_chan_total = 0;
       int B3_chan_total = 0;
 
+      int B2_read_count[5][16] = 0;
+      int B3_read_count[6][24] = 0;
+      int B2_chan_count[5][16] = 0;
+      int B3_chan_count[6][24] = 0;
+
+      int B2_read_total[5][16] = 0;
+      int B3_read_total[6][24] = 0;
+      int B2_chan_total[5][16] = 0;
+      int B3_chan_total[6][24] = 0;
+
       int nLayers = 2;
       int nLadders = 24; // 24 for B3, 16 for B2
       int nSensors = 6; // 6 for B3, 5 for B2
@@ -102,22 +106,22 @@ void readDeadHotFromDB()
 	  for(int j=0; j<nSensors; j++)  { // sensor---B3 has 6 sensors per ladder, but B2 has only 5 (see below)
 	    for(int k=0; k<nSections; k++)  { // section---I need find out what exactly this means...
 	      for(int l=0; l<nReadouts; l++)  { // readout---I'm a little confused here, because the web says 12 chips per sensor...
-		if(h==0 && i < 16 && j < 5) B2_read_total++; // requirement of 16 and 5 for B2 (see above)
-		if(h==1) B3_read_total++;
+		if(h==0 && i < 16 && j < 5) {B2_read_total++; B2_read_total[j][i]++;} // requirement of 16 and 5 for B2 (see above)
+		if(h==1) {B3_read_total++; B3_read_total[j][i]++;}
 		if(deadMap.readoutStatus(h,i,j,k,l)!=0) {
-		  if(h==0 && i < 16 && j < 5) B2_read_count++; // requirement of 16 and 5 for B2 (see above)
-		  if(h==1) B3_read_count++;
+		  if(h==0 && i < 16 && j < 5) {B2_read_count++; B2_read_count[j][i]++;} // requirement of 16 and 5 for B2 (see above)
+		  if(h==1) {B3_read_count++; B3_read_count[j][i]++;}
 		} // readout status not zero
-		else {
-		  for(int m=0; m<384; m++) { // channel---note that 384=3*128 ...
-		    if(h==0 && i < 16 && j < 5) B2_chan_total++; // requirement of 16 and 5 for B2 (see above)
-		    if(h==1) B3_chan_total++;
+		for(int m=0; m<384; m++) { // channel---note that 384=3*128 ...
+		  if(deadMap.readoutStatus(h,i,j,k,l)==0) {
+		    if(h==0 && i < 16 && j < 5) {B2_chan_total++; B2_chan_total[j][i]++;} // requirement of 16 and 5 for B2 (see above)
+		    if(h==1) {B3_chan_total++; B3_chan_total[j][i]++;}
 		    if(deadMap.channelStatus(h,i,j,k,l,m)!=0 ) {
-		      if(h==0 && i < 16 && j < 5) B2_chan_count++; // requirement of 16 and 5 for B2 (see above)
-		      if(h==1) B3_chan_count++;
+		      if(h==0 && i < 16 && j < 5) {B2_chan_count++; B2_chan_count[j][i]++;} // requirement of 16 and 5 for B2 (see above)
+		      if(h==1) {B3_chan_count++; B3_chan_count[j][i]++;}
 		    } // status not zero
-		  } // channel
-		} // else
+		  } // readout status zero
+		} // channel
 	      } // readout
 	    } // section
 	  } // sensor
@@ -186,12 +190,10 @@ void readDeadHotFromDB()
 
   cout << "readDeadhotFromDB: now writing histograms to file" << endl;
 
-  TFile *outfile = TFile::Open("rundep.root","RECREATE");
-  B2_good->Write();
-  B3_good->Write();
+  outfile->Write();
+  outfile->Close();
+  delete outfile;
 
   cout << "readDeadhotFromDB: completed." << endl;
-
-
 
 }
