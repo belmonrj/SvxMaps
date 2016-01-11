@@ -1,9 +1,12 @@
 // --- original author: Theo Koblesky
 // --- current author: Ron Belmont
 
+//#include <cmath>
 
 void readDeadHotFromDB()
 {
+
+  gStyle->SetOptStat(0);
 
   cout << "Loading libraries..." << endl;
   gSystem->Load("libfun4all.so");
@@ -12,7 +15,8 @@ void readDeadHotFromDB()
 
 
   //const char* runFile = "allrun14_woraw_runlist.txt";
-  const char* runFile = "run14_short.list";
+  //const char* runFile = "run14_short.list";
+  const char* runFile = "Run14_3HeAu_short.list";
 
   vector<int> runNumber;
   vector<int> runNumberIndex;
@@ -32,7 +36,6 @@ void readDeadHotFromDB()
       cout << tmpNumber << " ";
       runNumberIndex.push_back(counter);
       counter++;
-      if(counter>5) break; // temp
     }
   cout << endl;
   cout << "Found " << runNumber.size() << " runs" << endl;
@@ -44,15 +47,44 @@ void readDeadHotFromDB()
   TH1F *B2_good = new TH1F("B2_good","B2_good",nruns,runNumberIndex[0]-0.5,runNumberIndex[nruns-1]-0.5);
   TH1F *B3_good = new TH1F("B3_good","B3_good",nruns,runNumberIndex[0]-0.5,runNumberIndex[nruns-1]-0.5);
 
-  // ---
-  TH2F *th2f_x1deadmap_B2_West = new TH2F("th2f_x1deadmap_B2_West","",5,-0.5,4.5,8,-0.5,7.5);
-  TH2F *th2f_x1deadmap_B2_East = new TH2F("th2f_x1deadmap_B2_East","",5,-0.5,4.5,8,8.5,15.5);
-  // ---
-  TH2F *th2f_x2deadmap_B2_West = new TH2F("th2f_x2deadmap_B2_West","",5,-0.5,4.5,8,-0.5,7.5);
-  TH2F *th2f_x2deadmap_B2_East = new TH2F("th2f_x2deadmap_B2_East","",5,-0.5,4.5,8,8.5,15.5);
-  TH2F *th2f_x2fullmap_B2_West = new TH2F("th2f_x2fullmap_B2_West","",5,-0.5,4.5,8,-0.5,7.5);
-  TH2F *th2f_x2fullmap_B2_East = new TH2F("th2f_x2fullmap_B2_East","",5,-0.5,4.5,8,8.5,15.5);
 
+
+  float ave_B2_read_count = 0;
+  float ave_B3_read_count = 0;
+  float ave_B2_chan_count = 0;
+  float ave_B3_chan_count = 0;
+
+  float ave_B2_read_total = 0;
+  float ave_B3_read_total = 0;
+  float ave_B2_chan_total = 0;
+  float ave_B3_chan_total = 0;
+
+  float ave_B2_read_count_diff[6][24];
+  float ave_B3_read_count_diff[6][24];
+  float ave_B2_chan_count_diff[6][24];
+  float ave_B3_chan_count_diff[6][24];
+
+  float ave_B2_read_total_diff[6][24];
+  float ave_B3_read_total_diff[6][24];
+  float ave_B2_chan_total_diff[6][24];
+  float ave_B3_chan_total_diff[6][24];
+
+  for(int i=0; i<6; i++)
+    {
+      for(int j=0; j<24; j++)
+	{
+	  // ---
+	  ave_B2_read_count_diff[i][j] = 0;
+	  ave_B3_read_count_diff[i][j] = 0;
+	  ave_B2_chan_count_diff[i][j] = 0;
+	  ave_B3_chan_count_diff[i][j] = 0;
+	  // ---
+	  ave_B2_read_total_diff[i][j] = 0;
+	  ave_B3_read_total_diff[i][j] = 0;
+	  ave_B2_chan_total_diff[i][j] = 0;
+	  ave_B3_chan_total_diff[i][j] = 0;
+	}
+    }
 
 
   for ( int irun = 0; irun < nruns; irun++ )
@@ -87,6 +119,33 @@ void readDeadHotFromDB()
       int B2_chan_total = 0;
       int B3_chan_total = 0;
 
+      int B2_read_count_diff[6][24];
+      int B3_read_count_diff[6][24];
+      int B2_chan_count_diff[6][24];
+      int B3_chan_count_diff[6][24];
+
+      int B2_read_total_diff[6][24];
+      int B3_read_total_diff[6][24];
+      int B2_chan_total_diff[6][24];
+      int B3_chan_total_diff[6][24];
+
+      for(int i=0; i<6; i++)
+	{
+	  for(int j=0; j<24; j++)
+	    {
+	      // ---
+	      B2_read_count_diff[i][j] = 0;
+	      B3_read_count_diff[i][j] = 0;
+	      B2_chan_count_diff[i][j] = 0;
+	      B3_chan_count_diff[i][j] = 0;
+	      // ---
+	      B2_read_total_diff[i][j] = 0;
+	      B3_read_total_diff[i][j] = 0;
+	      B2_chan_total_diff[i][j] = 0;
+	      B3_chan_total_diff[i][j] = 0;
+	    }
+	}
+
       int nLayers = 2;
       int nLadders = 24; // 24 for B3, 16 for B2
       int nSensors = 6; // 6 for B3, 5 for B2
@@ -99,22 +158,22 @@ void readDeadHotFromDB()
 
       for(int h=0; h<nLayers; h++) { // striplayer---layer 0 is B2, layer 1 is B3
 	for(int i=0; i<nLadders; i++) { // ladder---B3 has 24 ladders, but B2 has only 16 (see below)
-	  for(int j=0; j<nSensors; j++)  { // sensor---B3 has 6 sensors per ladder, but B2 has only 5 (see below)
-	    for(int k=0; k<nSections; k++)  { // section---I need find out what exactly this means...
-	      for(int l=0; l<nReadouts; l++)  { // readout---I'm a little confused here, because the web says 12 chips per sensor...
-		if(h==0 && i < 16 && j < 5) B2_read_total++; // requirement of 16 and 5 for B2 (see above)
-		if(h==1) B3_read_total++;
+	  for(int j=0; j<nSensors; j++) { // sensor---B3 has 6 sensors per ladder, but B2 has only 5 (see below)
+	    for(int k=0; k<nSections; k++) { // section---I need find out what exactly this means...
+	      for(int l=0; l<nReadouts; l++) { // readout---I'm a little confused here, because the web says 12 chips per sensor...
+		if(h==0 && i < 16 && j < 5) {B2_read_total++;B2_read_total_diff[j][i]++;} // requirement of 16 and 5 for B2 (see above)
+		if(h==1) {B3_read_total++;B3_read_total_diff[j][i]++;}
 		if(deadMap.readoutStatus(h,i,j,k,l)!=0) {
-		  if(h==0 && i < 16 && j < 5) B2_read_count++; // requirement of 16 and 5 for B2 (see above)
-		  if(h==1) B3_read_count++;
+		  if(h==0 && i < 16 && j < 5) {B2_read_count++;B2_read_count_diff[j][i]++;} // requirement of 16 and 5 for B2 (see above)
+		  if(h==1) {B3_read_count++;B3_read_count_diff[j][i]++;}
 		} // readout status not zero
 		else {
 		  for(int m=0; m<384; m++) { // channel---note that 384=3*128 ...
-		    if(h==0 && i < 16 && j < 5) B2_chan_total++; // requirement of 16 and 5 for B2 (see above)
-		    if(h==1) B3_chan_total++;
+		    if(h==0 && i < 16 && j < 5) {B2_chan_total++;B2_chan_total_diff[j][i]++;} // requirement of 16 and 5 for B2 (see above)
+		    if(h==1) {B3_chan_total++;B3_chan_total_diff[j][i]++;}
 		    if(deadMap.channelStatus(h,i,j,k,l,m)!=0 ) {
-		      if(h==0 && i < 16 && j < 5) B2_chan_count++; // requirement of 16 and 5 for B2 (see above)
-		      if(h==1) B3_chan_count++;
+		      if(h==0 && i < 16 && j < 5) {B2_chan_count++;B2_chan_count_diff[j][i]++;} // requirement of 16 and 5 for B2 (see above)
+		      if(h==1) {B3_chan_count++;B3_chan_count_diff[j][i]++;}
 		    } // status not zero
 		  } // channel
 		} // else
@@ -123,6 +182,35 @@ void readDeadHotFromDB()
 	  } // sensor
 	} // ladder
       } // layer
+
+      // ---
+      ave_B2_read_count += B2_read_count;
+      ave_B3_read_count += B3_read_count;
+      ave_B2_chan_count += B2_chan_count;
+      ave_B3_chan_count += B3_chan_count;
+      // ---
+      ave_B2_read_total += B2_read_total;
+      ave_B3_read_total += B3_read_total;
+      ave_B2_chan_total += B2_chan_total;
+      ave_B3_chan_total += B3_chan_total;
+      for(int i=0; i<6; i++)
+	{
+	  for(int j=0; j<24; j++)
+	    {
+	      // ---
+	      ave_B2_read_count_diff[i][j] += B2_read_count_diff[i][j];
+	      ave_B3_read_count_diff[i][j] += B3_read_count_diff[i][j];
+	      ave_B2_chan_count_diff[i][j] += B2_chan_count_diff[i][j];
+	      ave_B3_chan_count_diff[i][j] += B3_chan_count_diff[i][j];
+	      // ---
+	      ave_B2_read_total_diff[i][j] += B2_read_total_diff[i][j];
+	      ave_B3_read_total_diff[i][j] += B3_read_total_diff[i][j];
+	      ave_B2_chan_total_diff[i][j] += B2_chan_total_diff[i][j];
+	      ave_B3_chan_total_diff[i][j] += B3_chan_total_diff[i][j];
+	    }
+	}
+
+
 
       // cout<<"Good percentage of B2: "<<100-(B2_chan_count+B2_read_count*3*128)*100.0/(16*5*2*2*384)<<endl;
       // cout<<"Good percentage of B3: "<<100-(B3_chan_count+B3_read_count*3*128)*100.0/(24*6*2*2*384)<<endl;
@@ -140,6 +228,29 @@ void readDeadHotFromDB()
       // cout << "Good percentage of B3 channel " << B3_chan_average_good << endl;
       cout << "Product method for B2: " << B2_read_average_good*B2_chan_average_good << endl;
       cout << "Product method for B3: " << B3_read_average_good*B3_chan_average_good << endl;
+
+      // ---
+
+      float B2_read_average_good_diff[6][24];
+      float B2_chan_average_good_diff[6][24];
+      float B3_read_average_good_diff[6][24];
+      float B3_chan_average_good_diff[6][24];
+
+      for(int i=0; i<6; i++)
+	{
+	  for(int j=0; j<24; j++)
+	    {
+	      B2_read_average_good_diff[i][j] = 1-((float)B2_read_count_diff[i][j]/(float)B2_read_total_diff[i][j]);
+	      B2_chan_average_good_diff[i][j] = 1-((float)B2_chan_count_diff[i][j]/(float)B2_chan_total_diff[i][j]);
+
+	      B3_read_average_good_diff[i][j] = 1-((float)B3_read_count_diff[i][j]/(float)B3_read_total_diff[i][j]);
+	      B3_chan_average_good_diff[i][j] = 1-((float)B3_chan_count_diff[i][j]/(float)B3_chan_total_diff[i][j]);
+	      if(B3_read_total_diff[i][j] == 0) B3_read_average_good_diff[i][j] = 1;
+	      if(B3_chan_total_diff[i][j] == 0) B3_chan_average_good_diff[i][j] = 1;
+	    }
+	}
+
+
 
       // --- histograms
       // B2_good->SetBinContent(irun+1,100-(B2_chan_count+B2_read_count*3*128)*100.0/(16*5*2*2*384));
@@ -159,30 +270,119 @@ void readDeadHotFromDB()
       bool readref = false; // true or false??  not clear at the moment, but default in class is false
       bool successPixel = pixelMap.readFromDatabase(runno,readref);
 
-    //   int nLayer = 1;
-    //   int nLadder = 1;
-    //   int nSouth = 2;
-    //   int nROC = 1;
-    //   int nColumn = 1;
-    //   int nRow = 1;
-    //   for(int iLayer=0; iLayer<nLayer; iLayer++) {
-    // 	for(int iLadder=0; iLadder<nLadder; iLadder++) {
-    // 	  for(int iSouth=0; iSouth<nSouth; iSouth++) {
-    // 	    for(int iROC=0; i<nROC; iROC++) {
-    // 	      for(int iColumn=0; i<nColumn; iColumn++) {
-    // 		for(int iRow=0; i<nRow; iRow++) {
-    // 		  // --- get the status from the map
-    // 		  int status = pixelMap.getStatus(iLayer,iLadder,iSouth,iROC,iColumn,iRow);
-    // 		  // --- do other stuff...
-    // 		  // --- finished doing stuff
-    // 		} // Row
-    // 	      } // Column
-    // 	    } // ROC
-    // 	  } // South
-    // 	} // Ladder
-    //   } // Layer
+      // ------------------------
+      // --- begin pixel stuff...
+      // ------------------------
+
+      //   int nLayer = 1;
+      //   int nLadder = 1;
+      //   int nSouth = 2;
+      //   int nROC = 1;
+      //   int nColumn = 1;
+      //   int nRow = 1;
+      //   for(int iLayer=0; iLayer<nLayer; iLayer++) {
+      // 	for(int iLadder=0; iLadder<nLadder; iLadder++) {
+      // 	  for(int iSouth=0; iSouth<nSouth; iSouth++) {
+      // 	    for(int iROC=0; i<nROC; iROC++) {
+      // 	      for(int iColumn=0; i<nColumn; iColumn++) {
+      // 		for(int iRow=0; i<nRow; iRow++) {
+      // 		  // --- get the status from the map
+      // 		  int status = pixelMap.getStatus(iLayer,iLadder,iSouth,iROC,iColumn,iRow);
+      // 		  // --- do other stuff...
+      // 		  // --- finished doing stuff
+      // 		} // Row
+      // 	      } // Column
+      // 	    } // ROC
+      // 	  } // South
+      // 	} // Ladder
+      //   } // Layer
+
+      // -------------------
+      // --- end pixel stuff
+      // -------------------
 
     } // loop over run numbers
+
+  // ---
+  ave_B2_read_count /= (float)nruns;
+  ave_B3_read_count /= (float)nruns;
+  ave_B2_chan_count /= (float)nruns;
+  ave_B3_chan_count /= (float)nruns;
+  // ---
+  ave_B2_read_total /= (float)nruns;
+  ave_B3_read_total /= (float)nruns;
+  ave_B2_chan_total /= (float)nruns;
+  ave_B3_chan_total /= (float)nruns;
+  for(int i=0; i<6; i++)
+    {
+      for(int j=0; j<24; j++)
+	{
+	  // ---
+	  ave_B2_read_count_diff[i][j] /= (float)nruns;
+	  ave_B3_read_count_diff[i][j] /= (float)nruns;
+	  ave_B2_chan_count_diff[i][j] /= (float)nruns;
+	  ave_B3_chan_count_diff[i][j] /= (float)nruns;
+	  // ---
+	  ave_B2_read_total_diff[i][j] /= (float)nruns;
+	  ave_B3_read_total_diff[i][j] /= (float)nruns;
+	  ave_B2_chan_total_diff[i][j] /= (float)nruns;
+	  ave_B3_chan_total_diff[i][j] /= (float)nruns;
+	  // ---
+	  //cout << i << " " << j << " " << ave_B3_read_total_diff[i][j] << " " << ave_B3_chan_total_diff[i][j] << endl;
+	  cout << i << " " << j << " " << ave_B3_read_count_diff[i][j] << "/" << ave_B3_read_total_diff[i][j] << " " << ave_B3_chan_count_diff[i][j] << "/" << ave_B3_chan_total_diff[i][j] << endl;
+	}
+    }
+
+  float ave_B2_read_average_good = 1-((float)ave_B2_read_count/(float)ave_B2_read_total);
+  float ave_B2_chan_average_good = 1-((float)ave_B2_chan_count/(float)ave_B2_chan_total);
+  float ave_B3_read_average_good = 1-((float)ave_B3_read_count/(float)ave_B3_read_total);
+  float ave_B3_chan_average_good = 1-((float)ave_B3_chan_count/(float)ave_B3_chan_total);
+
+  float ave_B2_read_average_good_diff[6][24];
+  float ave_B2_chan_average_good_diff[6][24];
+  float ave_B3_read_average_good_diff[6][24];
+  float ave_B3_chan_average_good_diff[6][24];
+
+  TH2F *th2f_map_sensorXladder_B3 = new TH2F("th2f_map_sensorXladder_B3","",6,-0.5,5.5,24,-0.5,23.5);
+
+  float content_B3[6][24];
+
+  for(int i=0; i<6; i++)
+    {
+      for(int j=0; j<24; j++)
+	{
+	  ave_B2_read_average_good_diff[i][j] = 1-((float)ave_B2_read_count_diff[i][j]/(float)ave_B2_read_total_diff[i][j]);
+	  ave_B2_chan_average_good_diff[i][j] = 1-((float)ave_B2_chan_count_diff[i][j]/(float)ave_B2_chan_total_diff[i][j]);
+	  ave_B3_read_average_good_diff[i][j] = 1-((float)ave_B3_read_count_diff[i][j]/(float)ave_B3_read_total_diff[i][j]);
+	  ave_B3_chan_average_good_diff[i][j] = 1-((float)ave_B3_chan_count_diff[i][j]/(float)ave_B3_chan_total_diff[i][j]);
+	  // if(isnan(ave_B3_read_average_good_diff[i][j])) ave_B3_read_average_good_diff[i][j] = 0; // 0/0 = nan...
+	  // if(isnan(ave_B3_chan_average_good_diff[i][j])) ave_B3_chan_average_good_diff[i][j] = 0; // 0/0 = nan...
+	  if(TMath::IsNaN(ave_B3_read_average_good_diff[i][j])) ave_B3_read_average_good_diff[i][j] = 1; // 0/0 = nan...
+	  if(TMath::IsNaN(ave_B3_chan_average_good_diff[i][j])) ave_B3_chan_average_good_diff[i][j] = 1; // 0/0 = nan...
+	  // --- now start filling maps...
+	  content_B3[i][j] = ave_B3_read_average_good_diff[i][j]*ave_B3_chan_average_good_diff[i][j];
+	  th2f_map_sensorXladder_B3->SetBinContent(i+1,j+1,content_B3[i][j]);
+	  // ---
+	  // if( i == 0 || i == 2 || i == 4 )
+	  //   {
+	  //     cout << i << " " << j << " "
+	  // 	   << content_B3 << " "
+	  // 	   << content_B3 << " "
+	  // 	   << ave_B3_chan_average_good_diff[i][j] << " "
+	  // 	   << ave_B3_chan_count_diff[i][j] << " "
+	  // 	   << ave_B3_chan_total_diff[i][j] << " "
+	  // 	   << endl;
+	  //   }
+	}
+    }
+
+
+
+  // ---
+  cout << "Now looking at overall overages" << endl;
+  cout << "Product method for ave_B2: " << ave_B2_read_average_good*ave_B2_chan_average_good << endl;
+  cout << "Product method for ave_B3: " << ave_B3_read_average_good*ave_B3_chan_average_good << endl;
+
 
   cout << "readDeadhotFromDB: now writing histograms to file" << endl;
 
@@ -190,8 +390,23 @@ void readDeadHotFromDB()
   B2_good->Write();
   B3_good->Write();
 
-  cout << "readDeadhotFromDB: completed." << endl;
+  TCanvas *c1 = new TCanvas("c1","",800,600);
+  th2f_map_sensorXladder_B3->GetZaxis()->SetRangeUser(-0.001,1.001);
+  th2f_map_sensorXladder_B3->Draw("colz");
+  c1->Print(Form("%s.png",th2f_map_sensorXladder_B3->GetName()));
+  for(int i=0; i<6; i++)
+    {
+      for(int j=0; j<24; j++)
+	{
+	  TLatex tex1;
+	  tex1.DrawLatex(i-0.25,j-0.5,Form("%.1f%%",content_B3[i][j]*100));
+	}
+    }
+  c1->Print(Form("%s_percentages.png",th2f_map_sensorXladder_B3->GetName()));
 
+
+
+  cout << "readDeadhotFromDB: completed." << endl;
 
 
 }
