@@ -48,6 +48,44 @@ void readDeadHotFromDB()
   TH1F *B3_good = new TH1F("B3_good","B3_good",nruns,runNumberIndex[0]-0.5,runNumberIndex[nruns-1]-0.5);
 
 
+  // ----------
+  // --- pixels
+  // ----------
+
+  float ave_B0_chip_count = 0;
+  float ave_B1_chip_count = 0;
+
+  float ave_B0_chip_total = 0;
+  float ave_B1_chip_total = 0;
+
+  float ave_B0_chip_count_diff[16][20];
+  float ave_B1_chip_count_diff[16][20];
+
+  float ave_B0_chip_total_diff[16][20];
+  float ave_B1_chip_total_diff[16][20];
+
+
+  for(int i=0; i<16; i++)
+    {
+      for(int j=0; j<20; j++)
+	{
+	  // ---
+	  ave_B0_chip_count_diff[i][j] = 0;
+	  ave_B1_chip_count_diff[i][j] = 0;
+
+	  // ---
+	  ave_B0_chip_total_diff[i][j] = 0;
+	  ave_B1_chip_total_diff[i][j] = 0;
+
+	}
+    }
+
+
+
+
+  // ----------
+  // --- strips
+  // ----------
 
   float ave_B2_read_count = 0;
   float ave_B3_read_count = 0;
@@ -212,24 +250,15 @@ void readDeadHotFromDB()
 
 
 
-      // cout<<"Good percentage of B2: "<<100-(B2_chan_count+B2_read_count*3*128)*100.0/(16*5*2*2*384)<<endl;
-      // cout<<"Good percentage of B3: "<<100-(B3_chan_count+B3_read_count*3*128)*100.0/(24*6*2*2*384)<<endl;
       cout<<"Good percentage of B2: "<<1-(B2_chan_count+B2_read_count*3*128)*1.0/(16*5*2*2*384)<<endl;
       cout<<"Good percentage of B3: "<<1-(B3_chan_count+B3_read_count*3*128)*1.0/(24*6*2*2*384)<<endl;
 
-      // --- note that, for reasons unknown at this time, these numbers do not seem to be correct
       float B2_read_average_good = 1-((float)B2_read_count/(float)B2_read_total);
       float B2_chan_average_good = 1-((float)B2_chan_count/(float)B2_chan_total);
       float B3_read_average_good = 1-((float)B3_read_count/(float)B3_read_total);
       float B3_chan_average_good = 1-((float)B3_chan_count/(float)B3_chan_total);
-      // cout << "Good percentage of B2 readout " << B2_read_average_good << endl;
-      // cout << "Good percentage of B2 channel " << B2_chan_average_good << endl;
-      // cout << "Good percentage of B3 readout " << B3_read_average_good << endl;
-      // cout << "Good percentage of B3 channel " << B3_chan_average_good << endl;
       cout << "Product method for B2: " << B2_read_average_good*B2_chan_average_good << endl;
       cout << "Product method for B3: " << B3_read_average_good*B3_chan_average_good << endl;
-
-      // ---
 
       float B2_read_average_good_diff[6][24];
       float B2_chan_average_good_diff[6][24];
@@ -242,7 +271,6 @@ void readDeadHotFromDB()
 	    {
 	      B2_read_average_good_diff[i][j] = 1-((float)B2_read_count_diff[i][j]/(float)B2_read_total_diff[i][j]);
 	      B2_chan_average_good_diff[i][j] = 1-((float)B2_chan_count_diff[i][j]/(float)B2_chan_total_diff[i][j]);
-
 	      B3_read_average_good_diff[i][j] = 1-((float)B3_read_count_diff[i][j]/(float)B3_read_total_diff[i][j]);
 	      B3_chan_average_good_diff[i][j] = 1-((float)B3_chan_count_diff[i][j]/(float)B3_chan_total_diff[i][j]);
 	      if(B3_read_total_diff[i][j] == 0) B3_read_average_good_diff[i][j] = 1;
@@ -261,11 +289,14 @@ void readDeadHotFromDB()
       deadMap.writeToFile(Form("StripData/strip_channel_run%d.txt",runno));
       deadMap.writeReadoutsToFile(Form("StripData/strip_readout_run%d.txt",runno));
 
-      continue; // need to sort out stuff with the pixels later...
+      //continue; // need to sort out stuff with the pixels later...
       // --------- first i want to get some kind of map from the strips...
 
       //SvxPixelHotDeadMap pixelMap(0); // produced shitloads of error messages
       SvxPixelHotDeadMapv2 pixelMap(0);
+
+      svxAddress address;
+      //address.Initialize(); // ... ?
 
       bool readref = false; // true or false??  not clear at the moment, but default in class is false
       bool successPixel = pixelMap.readFromDatabase(runno,readref);
@@ -274,34 +305,128 @@ void readDeadHotFromDB()
       // --- begin pixel stuff...
       // ------------------------
 
-      //   int nLayer = 1;
-      //   int nLadder = 1;
-      //   int nSouth = 2;
-      //   int nROC = 1;
-      //   int nColumn = 1;
-      //   int nRow = 1;
-      //   for(int iLayer=0; iLayer<nLayer; iLayer++) {
-      // 	for(int iLadder=0; iLadder<nLadder; iLadder++) {
-      // 	  for(int iSouth=0; iSouth<nSouth; iSouth++) {
-      // 	    for(int iROC=0; i<nROC; iROC++) {
-      // 	      for(int iColumn=0; i<nColumn; iColumn++) {
-      // 		for(int iRow=0; i<nRow; iRow++) {
-      // 		  // --- get the status from the map
-      // 		  int status = pixelMap.getStatus(iLayer,iLadder,iSouth,iROC,iColumn,iRow);
-      // 		  // --- do other stuff...
-      // 		  // --- finished doing stuff
-      // 		} // Row
-      // 	      } // Column
-      // 	    } // ROC
-      // 	  } // South
-      // 	} // Ladder
-      //   } // Layer
+      int B0_chip_count = 0;
+      int B1_chip_count = 0;
+
+      int B0_chip_total = 0;
+      int B1_chip_total = 0;
+
+      int B0_chip_count_diff[16][20];
+      int B1_chip_count_diff[16][20];
+
+      int B0_chip_total_diff[16][20];
+      int B1_chip_total_diff[16][20];
+
+      for(int i=0; i<16; i++)
+	{
+	  for(int j=0; j<20; j++)
+	    {
+	      // ---
+	      B0_chip_count_diff[i][j] = 0;
+	      B1_chip_count_diff[i][j] = 0;
+	      // ---
+	      B0_chip_total_diff[i][j] = 0;
+	      B1_chip_total_diff[i][j] = 0;
+	    }
+	}
+
+      int nLayer = 2;
+      int nLadder = 20;
+      int nSensor = 4;
+      int nChip = 4;
+      int nColumn = 32;
+      int nRow = 256;
+      for(int iLayer=0; iLayer<nLayer; iLayer++) { // Layer
+      	for(int iLadder=0; iLadder<nLadder; iLadder++) { // Ladder
+	  bool B0 = ( iLayer == 0 && iLadder < 9 );
+	  bool B1 = ( iLayer == 1 );
+	  if( !B0 && !B1 ) continue;
+      	  for(int iSensor=0; iSensor<nSensor; iSensor++) { // Sensor
+	    int module = address.getPixelModuleID(iLayer,iLadder,iSensor); // get the module number based on layer, ladder, sensor
+	    // --- checks out
+	    //cout << iLayer << " " << iLadder << " " << iSensor << " " << module << endl;
+	    for(int iChip=0; iChip<nChip; iChip++) { // Chip (ROC)
+	      int ChipIndex = iChip;
+	      if ( iChip%2 ) ChipIndex += 4;
+	      for(int iColumn=0; iColumn<nColumn; iColumn++) { // column (32)
+		for(int iRow=0; iRow<nRow; iRow++) { // row (256*32 = 8192)
+		  bool status = pixelMap.isPixelOkForClustering(module,iChip,iColumn,iRow);
+		  // --- overall...
+		  if(B0) B0_chip_total++;
+		  if(B1) B1_chip_total++;
+		  if(B0 && status) B0_chip_count++;
+		  if(B1 && status) B1_chip_count++;
+		  // --- position...
+		  if(B0) B0_chip_total_diff[ChipIndex][iLadder]++;
+		  if(B1) B1_chip_total_diff[ChipIndex][iLadder]++;
+		  if(B0 && status) B0_chip_count_diff[ChipIndex][iLadder]++;
+		  if(B1 && status) B1_chip_count_diff[ChipIndex][iLadder]++;
+		} // Row
+	      } // Column
+	      // --- checks out
+	      // if(B0) cout << B0_chip_count_diff[ChipIndex][iLadder] << " "
+	      // 		  << B0_chip_total_diff[ChipIndex][iLadder] << " "
+	      // 		  << (float)B0_chip_count_diff[ChipIndex][iLadder]/(float)B0_chip_total_diff[ChipIndex][iLadder]
+	      // 		  << endl;
+	      // if(B1) cout << B1_chip_count_diff[ChipIndex][iLadder] << " "
+	      // 		  << B1_chip_total_diff[ChipIndex][iLadder] << " "
+	      // 		  << (float)B1_chip_count_diff[ChipIndex][iLadder]/(float)B1_chip_total_diff[ChipIndex][iLadder]
+	      // 		  << endl;
+	    } // Chip (ROC)
+      	  } // Sensor
+      	} // Ladder
+      } // Layer
+
+
+
+      // ---
+      ave_B0_chip_count += B0_chip_count;
+      ave_B1_chip_count += B1_chip_count;
+      // ---
+      ave_B0_chip_total += B0_chip_total;
+      ave_B1_chip_total += B1_chip_total;
+
+      for(int i=0; i<16; i++)
+	{
+	  for(int j=0; j<20; j++)
+	    {
+	      // ---
+	      ave_B0_chip_count_diff[i][j] += B0_chip_count_diff[i][j];
+	      ave_B1_chip_count_diff[i][j] += B1_chip_count_diff[i][j];
+	      // ---
+	      ave_B0_chip_total_diff[i][j] += B0_chip_total_diff[i][j];
+	      ave_B1_chip_total_diff[i][j] += B1_chip_total_diff[i][j];
+	    }
+	}
+
+      float B0_chip_average_good = ((float)B0_chip_count/(float)B0_chip_total);
+      float B1_chip_average_good = ((float)B1_chip_count/(float)B1_chip_total);
+      cout << "Product method for B0: " << B0_chip_average_good << endl;
+      cout << "Product method for B1: " << B1_chip_average_good << endl;
+
+      float B0_chip_average_good_diff[16][20];
+      float B1_chip_average_good_diff[16][20];
+
+      for(int i=0; i<4; i++)
+	{
+	  for(int j=0; j<20; j++)
+	    {
+	      B0_chip_average_good_diff[i][j] = ((float)B0_chip_count_diff[i][j]/(float)B0_chip_total_diff[i][j]);
+	      B1_chip_average_good_diff[i][j] = ((float)B1_chip_count_diff[i][j]/(float)B1_chip_total_diff[i][j]);
+	      if(B1_chip_total_diff[i][j] == 0) B1_chip_average_good_diff[i][j] = 1;
+	    }
+	}
 
       // -------------------
       // --- end pixel stuff
       // -------------------
 
     } // loop over run numbers
+
+
+
+
+  // --- final processing
 
   // ---
   ave_B2_read_count /= (float)nruns;
@@ -328,8 +453,6 @@ void readDeadHotFromDB()
 	  ave_B2_chan_total_diff[i][j] /= (float)nruns;
 	  ave_B3_chan_total_diff[i][j] /= (float)nruns;
 	  // ---
-	  //cout << i << " " << j << " " << ave_B3_read_total_diff[i][j] << " " << ave_B3_chan_total_diff[i][j] << endl;
-	  cout << i << " " << j << " " << ave_B3_read_count_diff[i][j] << "/" << ave_B3_read_total_diff[i][j] << " " << ave_B3_chan_count_diff[i][j] << "/" << ave_B3_chan_total_diff[i][j] << endl;
 	}
     }
 
@@ -343,8 +466,10 @@ void readDeadHotFromDB()
   float ave_B3_read_average_good_diff[6][24];
   float ave_B3_chan_average_good_diff[6][24];
 
+  TH2F *th2f_map_sensorXladder_B2 = new TH2F("th2f_map_sensorXladder_B2","",5,-0.5,4.5,16,-0.5,15.5);
   TH2F *th2f_map_sensorXladder_B3 = new TH2F("th2f_map_sensorXladder_B3","",6,-0.5,5.5,24,-0.5,23.5);
 
+  float content_B2[6][24];
   float content_B3[6][24];
 
   for(int i=0; i<6; i++)
@@ -355,24 +480,18 @@ void readDeadHotFromDB()
 	  ave_B2_chan_average_good_diff[i][j] = 1-((float)ave_B2_chan_count_diff[i][j]/(float)ave_B2_chan_total_diff[i][j]);
 	  ave_B3_read_average_good_diff[i][j] = 1-((float)ave_B3_read_count_diff[i][j]/(float)ave_B3_read_total_diff[i][j]);
 	  ave_B3_chan_average_good_diff[i][j] = 1-((float)ave_B3_chan_count_diff[i][j]/(float)ave_B3_chan_total_diff[i][j]);
-	  // if(isnan(ave_B3_read_average_good_diff[i][j])) ave_B3_read_average_good_diff[i][j] = 0; // 0/0 = nan...
-	  // if(isnan(ave_B3_chan_average_good_diff[i][j])) ave_B3_chan_average_good_diff[i][j] = 0; // 0/0 = nan...
+	  if(TMath::IsNaN(ave_B2_read_average_good_diff[i][j])) ave_B2_read_average_good_diff[i][j] = 1; // 0/0 = nan...
+	  if(TMath::IsNaN(ave_B2_chan_average_good_diff[i][j])) ave_B2_chan_average_good_diff[i][j] = 1; // 0/0 = nan...
 	  if(TMath::IsNaN(ave_B3_read_average_good_diff[i][j])) ave_B3_read_average_good_diff[i][j] = 1; // 0/0 = nan...
 	  if(TMath::IsNaN(ave_B3_chan_average_good_diff[i][j])) ave_B3_chan_average_good_diff[i][j] = 1; // 0/0 = nan...
 	  // --- now start filling maps...
+	  if( i < 5 && j < 16 )
+	    {
+	      content_B2[i][j] = ave_B2_read_average_good_diff[i][j]*ave_B2_chan_average_good_diff[i][j];
+	      th2f_map_sensorXladder_B2->SetBinContent(i+1,j+1,content_B2[i][j]);
+	    }
 	  content_B3[i][j] = ave_B3_read_average_good_diff[i][j]*ave_B3_chan_average_good_diff[i][j];
 	  th2f_map_sensorXladder_B3->SetBinContent(i+1,j+1,content_B3[i][j]);
-	  // ---
-	  // if( i == 0 || i == 2 || i == 4 )
-	  //   {
-	  //     cout << i << " " << j << " "
-	  // 	   << content_B3 << " "
-	  // 	   << content_B3 << " "
-	  // 	   << ave_B3_chan_average_good_diff[i][j] << " "
-	  // 	   << ave_B3_chan_count_diff[i][j] << " "
-	  // 	   << ave_B3_chan_total_diff[i][j] << " "
-	  // 	   << endl;
-	  //   }
 	}
     }
 
@@ -386,11 +505,20 @@ void readDeadHotFromDB()
 
   cout << "readDeadhotFromDB: now writing histograms to file" << endl;
 
-  TFile *outfile = TFile::Open("rundep.root","RECREATE");
-  B2_good->Write();
-  B3_good->Write();
-
   TCanvas *c1 = new TCanvas("c1","",800,600);
+  th2f_map_sensorXladder_B2->GetZaxis()->SetRangeUser(-0.001,1.001);
+  th2f_map_sensorXladder_B2->Draw("colz");
+  c1->Print(Form("%s.png",th2f_map_sensorXladder_B2->GetName()));
+  for(int i=0; i<5; i++)
+    {
+      for(int j=0; j<16; j++)
+	{
+	  TLatex tex1;
+	  tex1.DrawLatex(i-0.25,j-0.4,Form("%.1f%%",content_B2[i][j]*100));
+	}
+    }
+  c1->Print(Form("%s_percentages.png",th2f_map_sensorXladder_B2->GetName()));
+  // ---
   th2f_map_sensorXladder_B3->GetZaxis()->SetRangeUser(-0.001,1.001);
   th2f_map_sensorXladder_B3->Draw("colz");
   c1->Print(Form("%s.png",th2f_map_sensorXladder_B3->GetName()));
@@ -406,7 +534,105 @@ void readDeadHotFromDB()
 
 
 
+  // ----------
+  // --- pixels
+  // ----------
+
+  // ---
+  ave_B0_chip_count /= (float)nruns;
+  ave_B1_chip_count /= (float)nruns;
+  // ---
+  ave_B0_chip_total /= (float)nruns;
+  ave_B1_chip_total /= (float)nruns;
+
+  for(int i=0; i<16; i++)
+    {
+      for(int j=0; j<20; j++)
+	{
+	  // ---
+	  ave_B0_chip_count_diff[i][j] /= (float)nruns;
+	  ave_B1_chip_count_diff[i][j] /= (float)nruns;
+	  // ---
+	  ave_B0_chip_total_diff[i][j] /= (float)nruns;
+	  ave_B1_chip_total_diff[i][j] /= (float)nruns;
+	}
+    }
+
+  float ave_B0_chip_average_good = ((float)ave_B0_chip_count/(float)ave_B0_chip_total);
+  float ave_B1_chip_average_good = ((float)ave_B1_chip_count/(float)ave_B1_chip_total);
+
+  float ave_B0_chip_average_good_diff[16][20];
+  float ave_B1_chip_average_good_diff[16][20];
+
+  TH2F *th2f_map_sensorXladder_B0 = new TH2F("th2f_map_sensorXladder_B0","",16,-0.5,15.5,10,-0.5,9.5);
+  TH2F *th2f_map_sensorXladder_B1 = new TH2F("th2f_map_sensorXladder_B1","",16,-0.5,15.5,20,-0.5,19.5);
+
+  float content_B0[16][20];
+  float content_B1[16][20];
+
+  for(int i=0; i<16; i++)
+    {
+      for(int j=0; j<20; j++)
+	{
+	  ave_B0_chip_average_good_diff[i][j] = ((float)ave_B0_chip_count_diff[i][j]/(float)ave_B0_chip_total_diff[i][j]);
+	  ave_B1_chip_average_good_diff[i][j] = ((float)ave_B1_chip_count_diff[i][j]/(float)ave_B1_chip_total_diff[i][j]);
+	  if(TMath::IsNaN(ave_B0_chip_average_good_diff[i][j])) ave_B0_chip_average_good_diff[i][j] = 1; // 0/0 = nan...
+	  if(TMath::IsNaN(ave_B1_chip_average_good_diff[i][j])) ave_B1_chip_average_good_diff[i][j] = 1; // 0/0 = nan...
+	  // --- now start filling maps...
+	  if( j < 10 )
+	    {
+	      content_B0[i][j] = ave_B0_chip_average_good_diff[i][j];
+	      th2f_map_sensorXladder_B0->SetBinContent(i+1,j+1,content_B0[i][j]);
+	    }
+	  content_B1[i][j] = ave_B1_chip_average_good_diff[i][j];
+	  th2f_map_sensorXladder_B1->SetBinContent(i+1,j+1,content_B1[i][j]);
+	}
+    }
+
+
+
+  // ---
+  cout << "Now looking at overall overages" << endl;
+  cout << "Product method for ave_B0: " << ave_B0_chip_average_good << endl;
+  cout << "Product method for ave_B1: " << ave_B1_chip_average_good << endl;
+
+
+
+  cout << "readDeadhotFromDB: now writing histograms to file" << endl;
+
+  TCanvas *c1 = new TCanvas("c1","",800,600);
+  th2f_map_sensorXladder_B0->GetZaxis()->SetRangeUser(-0.001,1.001);
+  th2f_map_sensorXladder_B0->Draw("colz");
+  c1->Print(Form("%s.png",th2f_map_sensorXladder_B0->GetName()));
+  for(int i=0; i<16; i++)
+    {
+      for(int j=0; j<10; j++)
+	{
+	  TLatex tex1;
+	  tex1.SetTextSize(0.03);
+	  tex1.DrawLatex(i-0.5,j-0.15,Form("%.0f%%",content_B0[i][j]*100));
+	}
+    }
+  c1->Print(Form("%s_percentages.png",th2f_map_sensorXladder_B0->GetName()));
+  // ---
+  th2f_map_sensorXladder_B1->GetZaxis()->SetRangeUser(-0.001,1.001);
+  th2f_map_sensorXladder_B1->Draw("colz");
+  c1->Print(Form("%s.png",th2f_map_sensorXladder_B1->GetName()));
+  for(int i=0; i<16; i++)
+    {
+      for(int j=0; j<20; j++)
+	{
+	  TLatex tex1;
+	  tex1.SetTextSize(0.03);
+	  tex1.DrawLatex(i-0.5,j-0.25,Form("%.0f%%",content_B1[i][j]*100));
+	}
+    }
+  c1->Print(Form("%s_percentages.png",th2f_map_sensorXladder_B1->GetName()));
+
+
+
   cout << "readDeadhotFromDB: completed." << endl;
+
 
 
 }
