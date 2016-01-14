@@ -30,7 +30,7 @@ void DoItByRunNumber(const int run)
 
   // --- make TCanvas for drawing plots
 
-  TCanvas *c1 = new TCanvas("c1","",800,600);
+  TCanvas *c1 = new TCanvas("c1","",900,700);
 
   // --- get the pixel map object, the address object, and read from the DB
 
@@ -93,27 +93,29 @@ void DoItByRunNumber(const int run)
 	  int ROC = iChip;
 	  if( iSensor%2 ) ROC += 4;
 	  int ChipIndex = iSensor*nChip + iChip;
-	  if(iLayer == 0 && iLadder == 8 && ChipIndex == 3){
-	    for(int iTile=0; iTile<16; iTile++)
-	      {
-		cout << module << " " << ROC << " " << iTile << " "
-		     << pixelMap.getTileGoodFrac(module,ROC,iTile) << endl;
-	      }
-	  }
+	  // --- some diagnostics, testing the DB and comparing to the QA webpage
+	  // if(iLayer == 0 && iLadder == 8 && ChipIndex == 3){
+	  //   for(int iTile=0; iTile<16; iTile++)
+	  //     {
+	  // 	cout << module << " " << ROC << " " << iTile << " "
+	  // 	     << pixelMap.getTileGoodFrac(module,ROC,iTile) << endl;
+	  //     }
+	  // }
 	  for(int iColumn=0; iColumn<nColumn; iColumn++) { // column (32)
 	    for(int iRow=0; iRow<nRow; iRow++) { // row (256*32 = 8192)
 	      int chipStatus = pixelMap.getChipStatus(module,ROC);
 	      int pixelStatus = pixelMap.getPixelStatus(module,ROC,iColumn,iRow);
+	      // --- some diagnostics, testing the DB and comparing to the QA webpage
 	      //if(iLayer == 0 && iLadder == 8 && ChipIndex == 3 && iRow == 74 && iColumn == 20)
-	      if(iLayer == 0 && iLadder == 8 && ChipIndex == 3 && (chipStatus !=0 || pixelStatus !=0 ) )
-		{
-		  cout << wtfmate << " " << iSensor << " "
-		       << module << " " << ROC << " "
-		       << chipStatus << " " << pixelStatus << " "
-		       << iRow << " " << iColumn << " "
-		       << endl;
-		  wtfmate++;
-		}
+	      // if(iLayer == 0 && iLadder == 8 && ChipIndex == 3 && (chipStatus !=0 || pixelStatus !=0 ) )
+	      // 	{
+	      // 	  cout << wtfmate << " " << iSensor << " "
+	      // 	       << module << " " << ROC << " "
+	      // 	       << chipStatus << " " << pixelStatus << " "
+	      // 	       << iRow << " " << iColumn << " "
+	      // 	       << endl;
+	      // 	  wtfmate++;
+	      // 	}
 	      bool isgood = (chipStatus == 0 && pixelStatus == 0);
 	      //bool isgood = pixelMap.isPixelOkForClustering(module,ROC,iColumn,iRow);
 	      // --- overall...
@@ -142,8 +144,8 @@ void DoItByRunNumber(const int run)
   cout << "Product method for B0: " << B0_chip_average_good << endl;
   cout << "Product method for B1: " << B1_chip_average_good << endl;
 
-  TH2F *th2f_map_sensorXladder_B0 = new TH2F("th2f_map_sensorXladder_B0","",16,-0.5,15.5,10,-0.5,9.5);
-  TH2F *th2f_map_sensorXladder_B1 = new TH2F("th2f_map_sensorXladder_B1","",16,-0.5,15.5,20,-0.5,19.5);
+  TH2F *th2f_map_sensorXladder_B0 = new TH2F(Form("th2f_map_sensorXladder_B0_run%d",run),"",16,-0.5,15.5,10,-0.5,9.5);
+  TH2F *th2f_map_sensorXladder_B1 = new TH2F(Form("th2f_map_sensorXladder_B1_run%d",run),"",16,-0.5,15.5,20,-0.5,19.5);
   float B0_chip_average_good_diff[16][20];
   float B1_chip_average_good_diff[16][20];
   float content_B0[16][20];
@@ -172,7 +174,7 @@ void DoItByRunNumber(const int run)
   // --- B0
   th2f_map_sensorXladder_B0->GetZaxis()->SetRangeUser(-0.001,1.001);
   th2f_map_sensorXladder_B0->Draw("colz");
-  c1->Print(Form("%s_%d.png",th2f_map_sensorXladder_B0->GetName(),run));
+  // c1->Print(Form("Figures/%s.png",th2f_map_sensorXladder_B0->GetName()));
   for(int i=0; i<16; i++)
     {
       for(int j=0; j<10; j++)
@@ -182,11 +184,11 @@ void DoItByRunNumber(const int run)
 	  tex1.DrawLatex(i-0.5,j-0.15,Form("%.0f%%",content_B0[i][j]*100));
 	}
     }
-  c1->Print(Form("%s_%d_percentages.png",th2f_map_sensorXladder_B0->GetName(),run));
+  c1->Print(Form("Figures/%s_percentages.png",th2f_map_sensorXladder_B0->GetName()));
   // --- B1
   th2f_map_sensorXladder_B1->GetZaxis()->SetRangeUser(-0.001,1.001);
   th2f_map_sensorXladder_B1->Draw("colz");
-  c1->Print(Form("%s_%d.png",th2f_map_sensorXladder_B1->GetName(),run));
+  // c1->Print(Form("Figures/%s.png",th2f_map_sensorXladder_B1->GetName()));
   for(int i=0; i<16; i++)
     {
       for(int j=0; j<20; j++)
@@ -196,7 +198,7 @@ void DoItByRunNumber(const int run)
 	  tex1.DrawLatex(i-0.5,j-0.25,Form("%.0f%%",content_B1[i][j]*100));
 	}
     }
-  c1->Print(Form("%s_%d_percentages.png",th2f_map_sensorXladder_B1->GetName(),run));
+  c1->Print(Form("Figures/%s_percentages.png",th2f_map_sensorXladder_B1->GetName()));
 
 
 
@@ -291,8 +293,8 @@ void DoItByRunNumber(const int run)
   cout << "Product method for B2: " << B2_chan_average_good << endl;
   cout << "Product method for B3: " << B3_chan_average_good << endl;
 
-  TH2F *th2f_map_sensorXladder_B2 = new TH2F("th2f_map_sensorXladder_B2","",5,-0.5,4.5,16,-0.5,15.5);
-  TH2F *th2f_map_sensorXladder_B3 = new TH2F("th2f_map_sensorXladder_B3","",6,-0.5,5.5,24,-0.5,23.5);
+  TH2F *th2f_map_sensorXladder_B2 = new TH2F(Form("th2f_map_sensorXladder_B2_run%d",run),"",5,-0.5,4.5,16,-0.5,15.5);
+  TH2F *th2f_map_sensorXladder_B3 = new TH2F(Form("th2f_map_sensorXladder_B3_run%d",run),"",6,-0.5,5.5,24,-0.5,23.5);
   float B2_chan_average_good_diff[6][24];
   float B3_chan_average_good_diff[6][24];
   float content_B2[6][24];
@@ -303,8 +305,8 @@ void DoItByRunNumber(const int run)
 	{
 	  B2_chan_average_good_diff[i][j] = ((float)B2_chan_count_diff[i][j]/(float)B2_chan_total_diff[i][j]);
 	  B3_chan_average_good_diff[i][j] = ((float)B3_chan_count_diff[i][j]/(float)B3_chan_total_diff[i][j]);
-	  if(TMath::IsNaN(B2_chan_average_good_diff[i][j])) B2_chan_average_good_diff[i][j] = 1; // 0/0 = nan...
-	  if(TMath::IsNaN(B3_chan_average_good_diff[i][j])) B3_chan_average_good_diff[i][j] = 1; // 0/0 = nan...
+	  // if(TMath::IsNaN(B2_chan_average_good_diff[i][j])) B2_chan_average_good_diff[i][j] = 1; // 0/0 = nan...
+	  // if(TMath::IsNaN(B3_chan_average_good_diff[i][j])) B3_chan_average_good_diff[i][j] = 1; // 0/0 = nan...
 	  // --- now start filling maps...
 	  if( i < 5 && j < 16 )
 	    {
@@ -321,7 +323,7 @@ void DoItByRunNumber(const int run)
   // --- B2
   th2f_map_sensorXladder_B2->GetZaxis()->SetRangeUser(-0.001,1.001);
   th2f_map_sensorXladder_B2->Draw("colz");
-  c1->Print(Form("%s_%d.png",th2f_map_sensorXladder_B2->GetName(),run));
+  // c1->Print(Form("Figures/%s.png",th2f_map_sensorXladder_B2->GetName()));
   for(int i=0; i<5; i++)
     {
       for(int j=0; j<16; j++)
@@ -331,11 +333,11 @@ void DoItByRunNumber(const int run)
 	  tex1.DrawLatex(i-0.5,j-0.15,Form("%.0f%%",content_B2[i][j]*100));
 	}
     }
-  c1->Print(Form("%s_%d_percentages.png",th2f_map_sensorXladder_B2->GetName(),run));
+  c1->Print(Form("Figures/%s_percentages.png",th2f_map_sensorXladder_B2->GetName()));
   // --- B3
   th2f_map_sensorXladder_B3->GetZaxis()->SetRangeUser(-0.001,1.001);
   th2f_map_sensorXladder_B3->Draw("colz");
-  c1->Print(Form("%s_%d.png",th2f_map_sensorXladder_B3->GetName(),run));
+  // c1->Print(Form("Figures/%s.png",th2f_map_sensorXladder_B3->GetName()));
   for(int i=0; i<6; i++)
     {
       for(int j=0; j<24; j++)
@@ -345,9 +347,8 @@ void DoItByRunNumber(const int run)
 	  tex1.DrawLatex(i-0.5,j-0.25,Form("%.0f%%",content_B3[i][j]*100));
 	}
     }
-  c1->Print(Form("%s_%d_percentages.png",th2f_map_sensorXladder_B3->GetName(),run));
+  c1->Print(Form("Figures/%s_percentages.png",th2f_map_sensorXladder_B3->GetName()));
 
-
-
+  delete c1;
 
 }
