@@ -298,7 +298,8 @@ void readDeadHotFromDB()
       svxAddress address;
       //address.Initialize(); // ... ?
 
-      bool readref = false; // true or false??  not clear at the moment, but default in class is false
+      //bool readref = false; // true or false??  not clear at the moment, but default in class is false
+      bool readref = true; // true or false??  not clear at the moment, but default in class is false
       bool successPixel = pixelMap.readFromDatabase(runno,readref);
 
       // ------------------------
@@ -350,17 +351,18 @@ void readDeadHotFromDB()
 	      if ( iChip%2 ) ChipIndex += 4;
 	      for(int iColumn=0; iColumn<nColumn; iColumn++) { // column (32)
 		for(int iRow=0; iRow<nRow; iRow++) { // row (256*32 = 8192)
-		  bool status = pixelMap.isPixelOkForClustering(module,iChip,iColumn,iRow);
+		  bool status = pixelMap.isPixelOkForClustering(module,iChip,iColumn,iRow); // ...
+		  //int status = pixelMap.getPixelStatus(module,iChip,iColumn,iRow) + pixelMap.getChipStatus(module,iChip); // ...
 		  // --- overall...
 		  if(B0) B0_chip_total++;
 		  if(B1) B1_chip_total++;
-		  if(B0 && status) B0_chip_count++;
-		  if(B1 && status) B1_chip_count++;
+		  if(B0 && status == 1) B0_chip_count++;
+		  if(B1 && status == 1) B1_chip_count++;
 		  // --- position...
 		  if(B0) B0_chip_total_diff[ChipIndex][iLadder]++;
 		  if(B1) B1_chip_total_diff[ChipIndex][iLadder]++;
-		  if(B0 && status) B0_chip_count_diff[ChipIndex][iLadder]++;
-		  if(B1 && status) B1_chip_count_diff[ChipIndex][iLadder]++;
+		  if(B0 && status == 1) B0_chip_count_diff[ChipIndex][iLadder]++;
+		  if(B1 && status == 1) B1_chip_count_diff[ChipIndex][iLadder]++;
 		} // Row
 	      } // Column
 	      // --- checks out
