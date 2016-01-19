@@ -5,6 +5,9 @@ void DoItByRunNumber(const int);
 void MakeSimpleMaps()
 {
 
+  TFile *file = new TFile("efficiencies_runs.root","recreate");
+  file->cd();
+
   gStyle->SetOptStat(0);
 
   gSystem->Load("libfun4all.so");
@@ -13,6 +16,10 @@ void MakeSimpleMaps()
   DoItByRunNumber(415751); // Run14 3He+Au
   DoItByRunNumber(423844); // Run15 p+p
   DoItByRunNumber(408644); // Run14 Au+Au
+
+  file->Write();
+  file->Close();
+  delete file;
 
 }
 
