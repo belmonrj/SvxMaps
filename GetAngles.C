@@ -1,3 +1,5 @@
+const float pi = TMath::Pi();
+
 void GetAngles()
 {
 
@@ -17,11 +19,11 @@ void GetAngles()
 
 
   // --- layer, ladder, and sensor
-  for(int h=0; h<4; h++)
+  for(int h=0; h<4; h++) // layer
     {
-      for(int i=0; i<24; i++)
+      for(int i=0; i<24; i++) // ladder
 	{
-	  for(int j=0; j<6; j++)
+	  for(int j=0; j<6; j++) // sensor
 	    {
 	      bool B0 = (h == 0 && i < 10 && j < 4);
 	      bool B1 = (h == 1 && i < 20 && j < 4);
@@ -31,8 +33,61 @@ void GetAngles()
 	      if(B1) cout << "B1: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << geo->SensorPhiRad(h,i,j) << endl;
 	      if(B2) cout << "B2: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << geo->SensorPhiRad(h,i,j) << endl;
 	      if(B3) cout << "B3: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << geo->SensorPhiRad(h,i,j) << endl;
+	    } // sensor
+	} // ladder
+    } // layer
+
+
+
+  float RADIUS[4] = {2.63, 5.13, 11.77, 16.69};
+  float LENGTH[4] = {22.8, 22.8, 31.8,  38.2};
+  int   NOBINS[4] = {4,4,5,6}; // 4,4,5,6 means sensors, 16,16,5,6 means chips for pixels and sensors for strips
+
+  // --- layer, ladder, and sensor
+  for(int h=0; h<4; h++)
+    {
+      int nb = NOBINS[h];
+      float r = RADIUS[h];
+      float z = LENGTH[h];
+      float zmax = z/2.0;
+      float zmin = -zmax;
+      float thetamax = atan2(r,zmax);
+      float thetamin = atan2(r,zmin);
+      float etamax = -log(tan(thetamax/2.0));
+      float etamin = -log(tan(thetamin/2.0));
+      float relthetamax = thetamax - pi/2.0;
+      float relthetamin = thetamin - pi/2.0;
+      // ---
+      float div = (float)nb;
+      float zwidth = z/div;
+      float zcenter = zwidth/2.0;
+      cout << "layer " << h
+	   << " eta range is from "   << etamin   << " to " << etamax
+	   << " number of z bins is " << nb << " with bin width " << zwidth
+	   << endl;
+      // ---
+
+      for(int i=0; i<24; i++)
+	{
+	  for(int j=0; j<16; j++)
+	    {
+	      bool B0 = (h == 0 && i < 10 && j < nb);
+	      bool B1 = (h == 1 && i < 20 && j < nb);
+	      bool B2 = (h == 2 && i < 16 && j < nb);
+	      bool B3 = (h == 3 && i < 24 && j < nb);
+	      float zlo = zmin + j*zwidth;
+	      float zhi = zmin + (j+1)*zwidth;
+	      float zce = zlo + zcenter;
+	      if(j<nb && i==0)
+		cout << " for z bin number " << j
+		     << " center of bin is " << zce
+		     << " low edge of bin is " << zlo
+		     << " high edge of bin is " << zhi
+		     << endl;
 	    }
 	}
     }
+
+
 
 }
