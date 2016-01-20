@@ -1,6 +1,6 @@
 const float pi = TMath::Pi();
 
-void GetAngles()
+void GetAngles(int verbosity = 2)
 {
 
   // gSystem->Load("libfun4all.so");
@@ -29,10 +29,17 @@ void GetAngles()
 	      bool B1 = (h == 1 && i < 20 && j < 4);
 	      bool B2 = (h == 2 && i < 16 && j < 5);
 	      bool B3 = (h == 3 && i < 24 && j < 6);
-	      if(B0) cout << "B0: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << geo->SensorPhiRad(h,i,j) << endl;
-	      if(B1) cout << "B1: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << geo->SensorPhiRad(h,i,j) << endl;
-	      if(B2) cout << "B2: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << geo->SensorPhiRad(h,i,j) << endl;
-	      if(B3) cout << "B3: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << geo->SensorPhiRad(h,i,j) << endl;
+	      float phi = geo->SensorPhiRad(h,i,j);
+	      float phiup = geo->SensorPhiRad(h,i+1,j);
+	      float deltaphi = phiup - phi;
+	      if(verbosity > 1 && j == 0 && (B0||B1||B2||B3)) cout << "layer " << h <<", deltaphi " << deltaphi << endl;
+	      if(verbosity > 2)
+		{
+		  if(B0) cout << "B0: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << endl;
+		  if(B1) cout << "B1: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << endl;
+		  if(B2) cout << "B2: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << endl;
+		  if(B3) cout << "B3: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << endl;
+		} // if verbosity
 	    } // sensor
 	} // ladder
     } // layer
@@ -41,7 +48,7 @@ void GetAngles()
 
   float RADIUS[4] = {2.63, 5.13, 11.77, 16.69};
   float LENGTH[4] = {22.8, 22.8, 31.8,  38.2};
-  int   NOBINS[4] = {4,4,5,6}; // 4,4,5,6 means sensors, 16,16,5,6 means chips for pixels and sensors for strips
+  int   NOBINS[4] = {16,16,5,6}; // 4,4,5,6 means sensors, 16,16,5,6 means chips for pixels and sensors for strips
 
   // --- layer, ladder, and sensor
   for(int h=0; h<4; h++)
@@ -75,15 +82,25 @@ void GetAngles()
 	      bool B1 = (h == 1 && i < 20 && j < nb);
 	      bool B2 = (h == 2 && i < 16 && j < nb);
 	      bool B3 = (h == 3 && i < 24 && j < nb);
+	      // ---
 	      float zlo = zmin + j*zwidth;
 	      float zhi = zmin + (j+1)*zwidth;
 	      float zce = zlo + zcenter;
-	      if(j<nb && i==0)
+	      // ---
+	      float etalo = -log(tan(atan2(r,zlo)/2.0));
+	      float etahi = -log(tan(atan2(r,zhi)/2.0));
+	      float etace = -log(tan(atan2(r,zce)/2.0));
+	      // ---
+	      if(j<nb && i==0 && verbosity > 0)
 		cout << " for z bin number " << j
-		     << " center of bin is " << zce
-		     << " low edge of bin is " << zlo
-		     << " high edge of bin is " << zhi
+		  //<< " center of bin is " << zce
+		  //<< " low edge of bin is " << zlo
+		  //<< " high edge of bin is " << zhi
+		     << " center of bin is " << etace
+		     << " low edge of bin is " << etalo
+		     << " high edge of bin is " << etahi
 		     << endl;
+
 	    }
 	}
     }
