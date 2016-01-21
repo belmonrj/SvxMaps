@@ -17,6 +17,7 @@ void GetAngles(int verbosity = 3)
   geo->AddSensors();
 
 
+  float sensorwidth[4] = {1.28, 1.28, 3.072, 3.072};
 
   // --- layer, ladder, and sensor
   for(int h=0; h<4; h++) // layer
@@ -30,15 +31,15 @@ void GetAngles(int verbosity = 3)
 	      bool B2 = (h == 2 && i < 16 && j < 5);
 	      bool B3 = (h == 3 && i < 24 && j < 6);
 	      float phi = geo->SensorPhiRad(h,i,j);
-	      float phiup = geo->SensorPhiRad(h,i+1,j);
-	      float deltaphi = phiup - phi;
-	      if(verbosity > 1 && j == 0 && (B0||B1||B2||B3)) cout << "layer " << h <<", deltaphi " << deltaphi << endl;
-	      if(verbosity > 2)
+	      float radius = geo->SensorRadius(h,i,j);
+	      float range = asin(sensorwidth[h]/radius/2.0);
+	      //if(verbosity > 1 && j == 0 && (B0||B1||B2||B3)) cout << "layer " << h <<", ladder " << i << ", deltaphi " << deltaphi << endl;
+	      if(verbosity > 3 || (verbosity > 2 && j == 0))
 		{
-		  if(B0) cout << "B0: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << endl;
-		  if(B1) cout << "B1: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << endl;
-		  if(B2) cout << "B2: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << endl;
-		  if(B3) cout << "B3: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << endl;
+		  if(B0) cout << "B0: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << " +- " << range << endl;
+		  if(B1) cout << "B1: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << " +- " << range << endl;
+		  if(B2) cout << "B2: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << " +- " << range << endl;
+		  if(B3) cout << "B3: layer " << h << ", ladder " << i << ", sensor " << j << ", phi angle = " << phi << " +- " << range << endl;
 		} // if verbosity
 	    } // sensor
 	} // ladder
@@ -68,6 +69,7 @@ void GetAngles(int verbosity = 3)
       float div = (float)nb;
       float zwidth = z/div;
       float zcenter = zwidth/2.0;
+      if(verbosity>3)
       cout << "layer " << h
 	   << " eta range is from "   << etamin   << " to " << etamax
 	   << " number of z bins is " << nb << " with bin width " << zwidth
@@ -91,7 +93,7 @@ void GetAngles(int verbosity = 3)
 	      float etahi = -log(tan(atan2(r,zhi)/2.0));
 	      float etace = -log(tan(atan2(r,zce)/2.0));
 	      // ---
-	      if(j<nb && i==0 && verbosity > 0)
+	      if(j<nb && i==0 && verbosity > 3)
 		cout << " for z bin number " << j
 		  //<< " center of bin is " << zce
 		  //<< " low edge of bin is " << zlo
