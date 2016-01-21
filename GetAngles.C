@@ -1,6 +1,6 @@
 const float pi = TMath::Pi();
 
-void GetAngles(int verbosity = 2)
+void GetAngles(int verbosity = 3)
 {
 
   // gSystem->Load("libfun4all.so");
