@@ -33,6 +33,16 @@ void AngleMaps(bool verbose = false)
   TH1F *th1f_ladder_B1 = (TH1F *)th2f_input_B1->ProjectionY();
   th1f_ladder_B1->Scale(1.0/16.0); // consider getting the 16 from the TH2
   TH1F *th1f_phi_B1 = new TH1F("th1f_phi_B1","",27,-3.14159,3.26726); // the ladder widths are not evenly divisible by 2pi
+  // --- B2
+  TH2F *th2f_input_B2 = (TH2F *)file->Get("th2f_map_sensorXladder_B2_run415751");
+  TH1F *th1f_ladder_B2 = (TH1F *)th2f_input_B2->ProjectionY();
+  th1f_ladder_B2->Scale(1.0/5.0); // consider getting the 5 from the TH2
+  TH1F *th1f_phi_B2 = new TH1F("th1f_phi_B2","",21,-3.14159,3.14159); // the ladder widths are not evenly divisible by 2pi
+  // --- B3
+  TH2F *th2f_input_B3 = (TH2F *)file->Get("th2f_map_sensorXladder_B3_run415751");
+  TH1F *th1f_ladder_B3 = (TH1F *)th2f_input_B3->ProjectionY();
+  th1f_ladder_B3->Scale(1.0/6.0); // consider getting the 6 from the TH2
+  TH1F *th1f_phi_B3 = new TH1F("th1f_phi_B3","",30,-3.14159,3.14159); // the ladder widths are not evenly divisible by 2pi
 
   // --- layer, ladder
   for(int h=0; h<4; h++) // layer
@@ -61,9 +71,25 @@ void AngleMaps(bool verbose = false)
 	    {
 	      eff = th1f_ladder_B1->GetBinContent(i+1);
 	      index = th1f_phi_B1->GetXaxis()->FindBin(phi);
-	      if(versbose) cout << i << " " << index << " " << phi << " " << eff << endl;
+	      if(verbose) cout << i << " " << index << " " << phi << " " << eff << endl;
 	      th1f_phi_B1->SetBinContent(index,eff);
 	    } // if B1
+	  // --- B2
+	  if(B2)
+	    {
+	      eff = th1f_ladder_B2->GetBinContent(i+1);
+	      index = th1f_phi_B2->GetXaxis()->FindBin(phi);
+	      if(verbose) cout << i << " " << index << " " << phi << " " << eff << endl;
+	      th1f_phi_B2->SetBinContent(index,eff);
+	    } // if B2
+	  // --- B3
+	  if(B3)
+	    {
+	      eff = th1f_ladder_B3->GetBinContent(i+1);
+	      index = th1f_phi_B3->GetXaxis()->FindBin(phi);
+	      if(true) cout << i << " " << index << " " << phi << " " << eff << endl;
+	      th1f_phi_B3->SetBinContent(index,eff);
+	    } // if B3
 	} // ladder
     } // layer
 
@@ -73,6 +99,12 @@ void AngleMaps(bool verbose = false)
 
   th1f_phi_B1->Draw();
   c1->Print("first_B1.png");
+
+  th1f_phi_B2->Draw();
+  c1->Print("first_B2.png");
+
+  th1f_phi_B3->Draw();
+  c1->Print("first_B3.png");
 
 
 
