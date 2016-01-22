@@ -31,36 +31,40 @@ void AngleMaps(bool verbose = false)
   TFile *file = TFile::Open("efficiencies_runs.root");
   // --- B0
   TH2F *th2f_input_B0 = (TH2F *)file->Get("th2f_map_sensorXladder_B0_run415751");
-  TH1F *th1f_ladder_B0 = (TH1F *)th2f_input_B0->ProjectionY();
+  TH1F *th1f_ladder_B0 = (TH1F *)th2f_input_B0->ProjectionY("th1f_ladder_B0");
+  TH1F *th1f_sensor_B0 = (TH1F *)th2f_input_B0->ProjectionX("th1f_sensor_B0");
   th1f_ladder_B0->Scale(1.0/th2f_input_B0->GetNbinsX());
-  TH1F *th1f_phi_B0 = new TH1F("th1f_phi_B0","",400,-pi/2,3*pi/2);
-  TH1F *th1f_sensor_B0 = (TH1F *)th2f_input_B0->ProjectionX();
   th1f_sensor_B0->Scale(1.0/th2f_input_B0->GetNbinsY());
+  TH1F *th1f_phi_B0 = new TH1F("th1f_phi_B0","",400,-pi/2,3*pi/2);
   TH1F *th1f_eta_B0 = new TH1F("th1f_eta_B0","",500,-2.5,2.5);
+  TH2F *th2f_phiz_B0 = new TH2F("th2f_phiz_B0","",400,-20,20,400,-pi/2,3*pi/2);
   // --- B1
   TH2F *th2f_input_B1 = (TH2F *)file->Get("th2f_map_sensorXladder_B1_run415751");
-  TH1F *th1f_ladder_B1 = (TH1F *)th2f_input_B1->ProjectionY();
+  TH1F *th1f_ladder_B1 = (TH1F *)th2f_input_B1->ProjectionY("th1f_ladder_B1");
+  TH1F *th1f_sensor_B1 = (TH1F *)th2f_input_B1->ProjectionX("th1f_sensor_B1");
   th1f_ladder_B1->Scale(1.0/th2f_input_B1->GetNbinsX());
-  TH1F *th1f_phi_B1 = new TH1F("th1f_phi_B1","",400,-pi/2,3*pi/2);
-  TH1F *th1f_sensor_B1 = (TH1F *)th2f_input_B1->ProjectionX();
   th1f_sensor_B1->Scale(1.0/th2f_input_B1->GetNbinsY());
+  TH1F *th1f_phi_B1 = new TH1F("th1f_phi_B1","",400,-pi/2,3*pi/2);
   TH1F *th1f_eta_B1 = new TH1F("th1f_eta_B1","",500,-2.5,2.5);
+  TH2F *th2f_phiz_B1 = new TH2F("th2f_phiz_B1","",400,-20,20,400,-pi/2,3*pi/2);
   // --- B2
   TH2F *th2f_input_B2 = (TH2F *)file->Get("th2f_map_sensorXladder_B2_run415751");
-  TH1F *th1f_ladder_B2 = (TH1F *)th2f_input_B2->ProjectionY();
+  TH1F *th1f_ladder_B2 = (TH1F *)th2f_input_B2->ProjectionY("th1f_ladder_B2");
+  TH1F *th1f_sensor_B2 = (TH1F *)th2f_input_B2->ProjectionX("th1f_sensor_B2");
   th1f_ladder_B2->Scale(1.0/th2f_input_B2->GetNbinsX());
-  TH1F *th1f_phi_B2 = new TH1F("th1f_phi_B2","",400,-pi/2,3*pi/2);
-  TH1F *th1f_sensor_B2 = (TH1F *)th2f_input_B2->ProjectionX();
   th1f_sensor_B2->Scale(1.0/th2f_input_B2->GetNbinsY());
+  TH1F *th1f_phi_B2 = new TH1F("th1f_phi_B2","",400,-pi/2,3*pi/2);
   TH1F *th1f_eta_B2 = new TH1F("th1f_eta_B2","",500,-2.5,2.5);
+  TH2F *th2f_phiz_B2 = new TH2F("th2f_phiz_B2","",400,-20,20,400,-pi/2,3*pi/2);
   // --- B3
   TH2F *th2f_input_B3 = (TH2F *)file->Get("th2f_map_sensorXladder_B3_run415751");
-  TH1F *th1f_ladder_B3 = (TH1F *)th2f_input_B3->ProjectionY();
+  TH1F *th1f_ladder_B3 = (TH1F *)th2f_input_B3->ProjectionY("th1f_ladder_B3");
+  TH1F *th1f_sensor_B3 = (TH1F *)th2f_input_B3->ProjectionX("th1f_sensor_B3");
   th1f_ladder_B3->Scale(1.0/th2f_input_B3->GetNbinsX());
-  TH1F *th1f_phi_B3 = new TH1F("th1f_phi_B3","",400,-pi/2,3*pi/2);
-  TH1F *th1f_sensor_B3 = (TH1F *)th2f_input_B3->ProjectionX();
   th1f_sensor_B3->Scale(1.0/th2f_input_B3->GetNbinsY());
+  TH1F *th1f_phi_B3 = new TH1F("th1f_phi_B3","",400,-pi/2,3*pi/2);
   TH1F *th1f_eta_B3 = new TH1F("th1f_eta_B3","",500,-2.5,2.5);
+  TH2F *th2f_phiz_B3 = new TH2F("th2f_phiz_B3","",400,-20,20,400,-pi/2,3*pi/2);
 
 
 
@@ -165,19 +169,70 @@ void AngleMaps(bool verbose = false)
 	  // ---
 	  for(int k=0; k<16; k++)
 	    {
-	      if(i>0) continue; // all ladders have same z/eta properties
 	      bool B0 = (h == 0 && k < nb);
 	      bool B1 = (h == 1 && k < nb);
 	      bool B2 = (h == 2 && k < nb);
 	      bool B3 = (h == 3 && k < nb);
+	      if(!B0 && !B1 && !B2 && !B3);
 	      // ---
-	      float zlo = zmin + i*zwidth;
+	      float zlo = zmin + k*zwidth;
 	      float zhi = zmin + (k+1)*zwidth;
 	      float zce = zlo + zcenter;
 	      // ---
 	      float etalo = -log(tan(atan2(r,zlo)/2.0));
 	      float etahi = -log(tan(atan2(r,zhi)/2.0));
 	      float etace = -log(tan(atan2(r,zce)/2.0));
+	      // ---
+	      float eff2d = -9;
+	      // ---
+	      if(B0)
+		{
+		  eff2d = th2f_input_B0->GetBinContent(k+1,i+1);
+		  int indexzlo = th2f_phiz_B0->GetXaxis()->FindBin(zlo);
+		  int indexzhi = th2f_phiz_B0->GetXaxis()->FindBin(zhi);
+		  int indexphilo = th2f_phiz_B0->GetYaxis()->FindBin(phi-hilo);
+		  int indexphihi = th2f_phiz_B0->GetYaxis()->FindBin(phi+hilo);
+		  for(int m=indexzlo; m<indexzhi; m++)
+		    for(int n=indexphilo; n<indexphihi; n++)
+		      th2f_phiz_B0->SetBinContent(m,n,eff2d);
+		}
+	      // ---
+	      if(B1)
+		{
+		  eff2d = th2f_input_B1->GetBinContent(k+1,i+1);
+		  int indexzlo = th2f_phiz_B1->GetXaxis()->FindBin(zlo);
+		  int indexzhi = th2f_phiz_B1->GetXaxis()->FindBin(zhi);
+		  int indexphilo = th2f_phiz_B1->GetYaxis()->FindBin(phi-hilo);
+		  int indexphihi = th2f_phiz_B1->GetYaxis()->FindBin(phi+hilo);
+		  for(int m=indexzlo; m<indexzhi; m++)
+		    for(int n=indexphilo; n<indexphihi; n++)
+		      th2f_phiz_B1->SetBinContent(m,n,eff2d);
+		}
+	      // ---
+	      if(B2)
+		{
+		  eff2d = th2f_input_B2->GetBinContent(k+1,i+1);
+		  int indexzlo = th2f_phiz_B2->GetXaxis()->FindBin(zlo);
+		  int indexzhi = th2f_phiz_B2->GetXaxis()->FindBin(zhi);
+		  int indexphilo = th2f_phiz_B2->GetYaxis()->FindBin(phi-hilo);
+		  int indexphihi = th2f_phiz_B2->GetYaxis()->FindBin(phi+hilo);
+		  for(int m=indexzlo; m<indexzhi; m++)
+		    for(int n=indexphilo; n<indexphihi; n++)
+		      th2f_phiz_B2->SetBinContent(m,n,eff2d);
+		}
+	      // ---
+	      if(B3)
+		{
+		  eff2d = th2f_input_B3->GetBinContent(k+1,i+1);
+		  int indexzlo = th2f_phiz_B3->GetXaxis()->FindBin(zlo);
+		  int indexzhi = th2f_phiz_B3->GetXaxis()->FindBin(zhi);
+		  int indexphilo = th2f_phiz_B3->GetYaxis()->FindBin(phi-hilo);
+		  int indexphihi = th2f_phiz_B3->GetYaxis()->FindBin(phi+hilo);
+		  for(int m=indexzlo; m<indexzhi; m++)
+		    for(int n=indexphilo; n<indexphihi; n++)
+		      th2f_phiz_B3->SetBinContent(m,n,eff2d);
+		}
+	      if(i>0) continue; // all ladders have same z/eta properties
 	      // ---
 	      float eff = -9;
 	      int indexhi = -9;
@@ -295,6 +350,23 @@ void AngleMaps(bool verbose = false)
   c1->Print("Figures/eta_ALL.png");
 
 
+  th2f_phiz_B0->GetZaxis()->SetLimits(-0.001,1.001);
+  th2f_phiz_B0->Draw("colz");
+  c1->Print("Figures/single_phiz_B0.png");
+
+  th2f_phiz_B1->GetZaxis()->SetLimits(-0.001,1.001);
+  th2f_phiz_B1->Draw("colz");
+  c1->Print("Figures/single_phiz_B1.png");
+
+  th2f_phiz_B2->GetZaxis()->SetLimits(-0.001,1.001);
+  th2f_phiz_B2->Draw("colz");
+  c1->Print("Figures/single_phiz_B2.png");
+
+  th2f_phiz_B3->GetZaxis()->SetLimits(-0.001,1.001);
+  th2f_phiz_B3->Draw("colz");
+  c1->Print("Figures/single_phiz_B3.png");
+
+
 
   // -----------------------------------------------
   // --- now write the relevant histograms to a file
@@ -312,6 +384,10 @@ void AngleMaps(bool verbose = false)
   th1f_eta_B2->Write();
   th1f_eta_B3->Write();
   th1f_eta_ALL->Write();
+  th2f_phiz_B0->Write();
+  th2f_phiz_B1->Write();
+  th2f_phiz_B2->Write();
+  th2f_phiz_B3->Write();
   outfile->Write();
   outfile->Close();
 
