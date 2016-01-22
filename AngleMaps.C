@@ -26,21 +26,33 @@ void AngleMaps(bool verbose = false)
   TH1F *th1f_ladder_B0 = (TH1F *)th2f_input_B0->ProjectionY();
   th1f_ladder_B0->Scale(1.0/th2f_input_B0->GetNbinsX());
   TH1F *th1f_phi_B0 = new TH1F("th1f_phi_B0","",400,-pi/2,3*pi/2);
+  TH1F *th1f_sensor_B0 = (TH1F *)th2f_input_B0->ProjectionX();
+  th1f_sensor_B0->Scale(1.0/th2f_input_B0->GetNbinsY());
+  TH1F *th1f_eta_B0 = new TH1F("th1f_eta_B0","",500,-2.5,2.5);
   // --- B1
   TH2F *th2f_input_B1 = (TH2F *)file->Get("th2f_map_sensorXladder_B1_run415751");
   TH1F *th1f_ladder_B1 = (TH1F *)th2f_input_B1->ProjectionY();
   th1f_ladder_B1->Scale(1.0/th2f_input_B1->GetNbinsX());
   TH1F *th1f_phi_B1 = new TH1F("th1f_phi_B1","",400,-pi/2,3*pi/2);
+  TH1F *th1f_sensor_B1 = (TH1F *)th2f_input_B1->ProjectionX();
+  th1f_sensor_B1->Scale(1.0/th2f_input_B1->GetNbinsY());
+  TH1F *th1f_eta_B1 = new TH1F("th1f_eta_B1","",500,-2.5,2.5);
   // --- B2
   TH2F *th2f_input_B2 = (TH2F *)file->Get("th2f_map_sensorXladder_B2_run415751");
   TH1F *th1f_ladder_B2 = (TH1F *)th2f_input_B2->ProjectionY();
   th1f_ladder_B2->Scale(1.0/th2f_input_B2->GetNbinsX());
   TH1F *th1f_phi_B2 = new TH1F("th1f_phi_B2","",400,-pi/2,3*pi/2);
+  TH1F *th1f_sensor_B2 = (TH1F *)th2f_input_B2->ProjectionX();
+  th1f_sensor_B2->Scale(1.0/th2f_input_B2->GetNbinsY());
+  TH1F *th1f_eta_B2 = new TH1F("th1f_eta_B2","",500,-2.5,2.5);
   // --- B3
   TH2F *th2f_input_B3 = (TH2F *)file->Get("th2f_map_sensorXladder_B3_run415751");
   TH1F *th1f_ladder_B3 = (TH1F *)th2f_input_B3->ProjectionY();
   th1f_ladder_B3->Scale(1.0/th2f_input_B3->GetNbinsX());
   TH1F *th1f_phi_B3 = new TH1F("th1f_phi_B3","",400,-pi/2,3*pi/2);
+  TH1F *th1f_sensor_B3 = (TH1F *)th2f_input_B3->ProjectionX();
+  th1f_sensor_B3->Scale(1.0/th2f_input_B3->GetNbinsY());
+  TH1F *th1f_eta_B3 = new TH1F("th1f_eta_B3","",500,-2.5,2.5);
 
   float phiwidth[8] = {
     0.245814, // layer 0, sublayer 0
@@ -115,67 +127,9 @@ void AngleMaps(bool verbose = false)
 
 
 
-  th1f_phi_B0->Draw();
-  c1->Print("Figures/phi_single_B0.png");
-
-  th1f_phi_B1->Draw();
-  c1->Print("Figures/phi_single_B1.png");
-
-  th1f_phi_B2->Draw();
-  c1->Print("Figures/phi_single_B2.png");
-
-  th1f_phi_B3->Draw();
-  c1->Print("Figures/phi_single_B3.png");
-
-
-
-  TH1F *th1f_phi_ALL = (TH1F *)th1f_phi_B0->Clone("th1f_phi_ALL");
-  th1f_phi_ALL->Multiply(th1f_phi_B1);
-  th1f_phi_ALL->Multiply(th1f_phi_B2);
-  th1f_phi_ALL->Multiply(th1f_phi_B2);
-  th1f_phi_ALL->SetLineColor(kBlack);
-  th1f_phi_ALL->Draw();
-
-  c1->Print("Figures/phi_combined.png");
-
-
-
-  th1f_phi_B0->SetLineColor(kBlue);
-  th1f_phi_B1->SetLineColor(kRed);
-  th1f_phi_B2->SetLineColor(kGreen+2);
-  th1f_phi_B3->SetLineColor(kMagenta);
-  th1f_phi_ALL->SetLineColor(kBlack);
-  th1f_phi_B0->Draw();
-  th1f_phi_B1->Draw("same");
-  th1f_phi_B2->Draw("same");
-  th1f_phi_B3->Draw("same");
-  th1f_phi_ALL->Draw("same");
-
-  c1->Print("Figures/phi_ALL.png");
-
-
-
   // -----------
   // --- now eta
   // -----------
-
-
-  // --- B0
-  TH1F *th1f_sensor_B0 = (TH1F *)th2f_input_B0->ProjectionX();
-  th1f_sensor_B0->Scale(1.0/th2f_input_B0->GetNbinsY());
-  TH1F *th1f_eta_B0 = new TH1F("th1f_eta_B0","",500,-2.5,2.5);
-  // --- B1
-  TH1F *th1f_sensor_B1 = (TH1F *)th2f_input_B1->ProjectionX();
-  th1f_sensor_B1->Scale(1.0/th2f_input_B1->GetNbinsY());
-  TH1F *th1f_eta_B1 = new TH1F("th1f_eta_B1","",500,-2.5,2.5);
-  // --- B2
-  TH1F *th1f_sensor_B2 = (TH1F *)th2f_input_B2->ProjectionX();
-  th1f_sensor_B2->Scale(1.0/th2f_input_B2->GetNbinsY());
-  TH1F *th1f_eta_B2 = new TH1F("th1f_eta_B2","",500,-2.5,2.5);
-  // --- B3
-  TH1F *th1f_sensor_B3 = (TH1F *)th2f_input_B3->ProjectionX();
-  th1f_sensor_B3->Scale(1.0/th2f_input_B3->GetNbinsY());
-  TH1F *th1f_eta_B3 = new TH1F("th1f_eta_B3","",500,-2.5,2.5);
 
 
 
@@ -257,6 +211,25 @@ void AngleMaps(bool verbose = false)
 
 
 
+  // --------------------
+  // --- now make figures
+  // --------------------
+
+  // --- individual figures
+
+  th1f_phi_B0->Draw();
+  c1->Print("Figures/phi_single_B0.png");
+
+  th1f_phi_B1->Draw();
+  c1->Print("Figures/phi_single_B1.png");
+
+  th1f_phi_B2->Draw();
+  c1->Print("Figures/phi_single_B2.png");
+
+  th1f_phi_B3->Draw();
+  c1->Print("Figures/phi_single_B3.png");
+
+
   th1f_eta_B0->Draw();
   c1->Print("Figures/eta_single_B0.png");
 
@@ -269,6 +242,27 @@ void AngleMaps(bool verbose = false)
   th1f_eta_B3->Draw();
   c1->Print("Figures/eta_single_B3.png");
 
+  // --- combined figures
+
+  TH1F *th1f_phi_ALL = (TH1F *)th1f_phi_B0->Clone("th1f_phi_ALL");
+  th1f_phi_ALL->Multiply(th1f_phi_B1);
+  th1f_phi_ALL->Multiply(th1f_phi_B2);
+  th1f_phi_ALL->Multiply(th1f_phi_B2);
+  th1f_phi_ALL->SetLineColor(kBlack);
+  th1f_phi_ALL->Draw();
+  c1->Print("Figures/phi_combined.png");
+
+  th1f_phi_B0->SetLineColor(kBlue);
+  th1f_phi_B1->SetLineColor(kRed);
+  th1f_phi_B2->SetLineColor(kGreen+2);
+  th1f_phi_B3->SetLineColor(kMagenta);
+  th1f_phi_ALL->SetLineColor(kBlack);
+  th1f_phi_B0->Draw();
+  th1f_phi_B1->Draw("same");
+  th1f_phi_B2->Draw("same");
+  th1f_phi_B3->Draw("same");
+  th1f_phi_ALL->Draw("same");
+  c1->Print("Figures/phi_ALL.png");
 
 
   TH1F *th1f_eta_ALL = (TH1F *)th1f_eta_B0->Clone("th1f_eta_ALL");
@@ -277,10 +271,7 @@ void AngleMaps(bool verbose = false)
   th1f_eta_ALL->Multiply(th1f_eta_B2);
   th1f_eta_ALL->SetLineColor(kBlack);
   th1f_eta_ALL->Draw();
-
   c1->Print("Figures/eta_combined.png");
-
-
 
   th1f_eta_B0->SetLineColor(kBlue);
   th1f_eta_B1->SetLineColor(kRed);
@@ -292,10 +283,13 @@ void AngleMaps(bool verbose = false)
   th1f_eta_B2->Draw("same");
   th1f_eta_B3->Draw("same");
   th1f_eta_ALL->Draw("same");
-
   c1->Print("Figures/eta_ALL.png");
 
 
+
+  // -----------------------------------------------
+  // --- now write the relevant histograms to a file
+  // -----------------------------------------------
 
   TFile *file = new TFile("histograms.root","recreate");
   file->cd();
