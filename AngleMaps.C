@@ -5,6 +5,10 @@ const float pi = TMath::Pi();
 void AngleMaps(bool verbose = false)
 {
 
+  // -----------------------------------------------------------
+  // --- load the relevant libraries and make the needed objects
+  // -----------------------------------------------------------
+
   // gSystem->Load("libfun4all.so");
   // gSystem->Load("libsvx.so");
   gSystem->Load("libsvxgeo.so");
@@ -19,6 +23,10 @@ void AngleMaps(bool verbose = false)
   geo->AddSensors();
 
 
+
+  // -----------------------------------------------------
+  // --- open the input file and get the needed histograms
+  // -----------------------------------------------------
 
   TFile *file = TFile::Open("efficiencies_runs.root");
   // --- B0
@@ -54,6 +62,16 @@ void AngleMaps(bool verbose = false)
   th1f_sensor_B3->Scale(1.0/th2f_input_B3->GetNbinsY());
   TH1F *th1f_eta_B3 = new TH1F("th1f_eta_B3","",500,-2.5,2.5);
 
+
+
+  // -------------------------------------
+  // --- create helpful geometry variables
+  // -------------------------------------
+
+  float RADIUS[4] = {2.63, 5.13, 11.77, 16.69}; // average radius for each layer
+  float LENGTH[4] = {22.8, 22.8, 31.8,  38.2}; // total length in z for each layer
+  int   NOBINS[4] = {16,16,5,6}; // 4,4,5,6 means sensors, 16,16,5,6 means chips for pixels and sensors for strips
+
   float phiwidth[8] = {
     0.245814, // layer 0, sublayer 0
     0.125082, // layer 1, sublayer 1
@@ -65,9 +83,31 @@ void AngleMaps(bool verbose = false)
     0.085910  // layer 3, sublayer 7 (outer)
   };
 
-  // --- layer, ladder
+
+
+  // ----------------------------------------------------------------------------------------------
+  // --- now start the loop to get the efficincies from ladder and sensor and conver to phi and eta
+  // ----------------------------------------------------------------------------------------------
+
+  // --- layer, ladder, sensor
   for(int h=0; h<4; h++) // layer
     {
+      int nb = NOBINS[h];
+      float r = RADIUS[h];
+      float z = LENGTH[h];
+      float zmax = z/2.0;
+      float zmin = -zmax;
+      float thetamax = atan2(r,zmax);
+      float thetamin = atan2(r,zmin);
+      float etamax = -log(tan(thetamax/2.0));
+      float etamin = -log(tan(thetamin/2.0));
+      float relthetamax = thetamax - pi/2.0;
+      float relthetamin = thetamin - pi/2.0;
+      // ---
+      float div = (float)nb;
+      float zwidth = z/div;
+      float zcenter = zwidth/2.0;
+      // ---
       for(int i=0; i<24; i++) // ladder
 	{
 	  bool B0 = (h == 0 && i < 10);
@@ -122,91 +162,60 @@ void AngleMaps(bool verbose = false)
 	      indexhi = th1f_phi_B3->GetXaxis()->FindBin(phi+hilo);
 	      for(int j=indexlo; j<indexhi; j++) th1f_phi_B3->SetBinContent(j,eff);
 	    } // if B3
+	  // ---
+	  for(int k=0; k<16; k++)
+	    {
+	      if(i>0) continue; // all ladders have same z/eta properties
+	      bool B0 = (h == 0 && k < nb);
+	      bool B1 = (h == 1 && k < nb);
+	      bool B2 = (h == 2 && k < nb);
+	      bool B3 = (h == 3 && k < nb);
+	      // ---
+	      float zlo = zmin + i*zwidth;
+	      float zhi = zmin + (k+1)*zwidth;
+	      float zce = zlo + zcenter;
+	      // ---
+	      float etalo = -log(tan(atan2(r,zlo)/2.0));
+	      float etahi = -log(tan(atan2(r,zhi)/2.0));
+	      float etace = -log(tan(atan2(r,zce)/2.0));
+	      // ---
+	      float eff = -9;
+	      int indexhi = -9;
+	      int indexlo = -9;
+	      // --- B0
+	      if(B0)
+		{
+		  eff = th1f_sensor_B0->GetBinContent(k+1);
+		  indexlo = th1f_eta_B0->GetXaxis()->FindBin(etalo);
+		  indexhi = th1f_eta_B0->GetXaxis()->FindBin(etahi);
+		  for(int j=indexlo; j<indexhi; j++) th1f_eta_B0->SetBinContent(j,eff);
+		} // if B0
+	      // --- B1
+	      if(B1)
+		{
+		  eff = th1f_sensor_B1->GetBinContent(k+1);
+		  indexlo = th1f_eta_B1->GetXaxis()->FindBin(etalo);
+		  indexhi = th1f_eta_B1->GetXaxis()->FindBin(etahi);
+		  for(int j=indexlo; j<indexhi; j++) th1f_eta_B1->SetBinContent(j,eff);
+		} // if B1
+	      // --- B2
+	      if(B2)
+		{
+		  eff = th1f_sensor_B2->GetBinContent(k+1);
+		  indexlo = th1f_eta_B2->GetXaxis()->FindBin(etalo);
+		  indexhi = th1f_eta_B2->GetXaxis()->FindBin(etahi);
+		  for(int j=indexlo; j<indexhi; j++) th1f_eta_B2->SetBinContent(j,eff);
+		} // if B2
+	      // --- B3
+	      if(B3)
+		{
+		  eff = th1f_sensor_B3->GetBinContent(k+1);
+		  indexlo = th1f_eta_B3->GetXaxis()->FindBin(etalo);
+		  indexhi = th1f_eta_B3->GetXaxis()->FindBin(etahi);
+		  for(int j=indexlo; j<indexhi; j++) th1f_eta_B3->SetBinContent(j,eff);
+		} // if B3
+	    } // sensor
 	} // ladder
-    } // layer
-
-
-
-  // -----------
-  // --- now eta
-  // -----------
-
-
-
-  float RADIUS[4] = {2.63, 5.13, 11.77, 16.69};
-  float LENGTH[4] = {22.8, 22.8, 31.8,  38.2};
-  int   NOBINS[4] = {16,16,5,6}; // 4,4,5,6 means sensors, 16,16,5,6 means chips for pixels and sensors for strips
-
-  // --- layer, sensor
-  for(int h=0; h<4; h++)
-    {
-      int nb = NOBINS[h];
-      float r = RADIUS[h];
-      float z = LENGTH[h];
-      float zmax = z/2.0;
-      float zmin = -zmax;
-      float thetamax = atan2(r,zmax);
-      float thetamin = atan2(r,zmin);
-      float etamax = -log(tan(thetamax/2.0));
-      float etamin = -log(tan(thetamin/2.0));
-      float relthetamax = thetamax - pi/2.0;
-      float relthetamin = thetamin - pi/2.0;
-      // ---
-      float div = (float)nb;
-      float zwidth = z/div;
-      float zcenter = zwidth/2.0;
-      // ---
-      for(int i=0; i<16; i++)
-	{
-	  bool B0 = (h == 0 && i < nb);
-	  bool B1 = (h == 1 && i < nb);
-	  bool B2 = (h == 2 && i < nb);
-	  bool B3 = (h == 3 && i < nb);
-	  // ---
-	  float zlo = zmin + i*zwidth;
-	  float zhi = zmin + (i+1)*zwidth;
-	  float zce = zlo + zcenter;
-	  // ---
-	  float etalo = -log(tan(atan2(r,zlo)/2.0));
-	  float etahi = -log(tan(atan2(r,zhi)/2.0));
-	  float etace = -log(tan(atan2(r,zce)/2.0));
-	  // ---
-	  float eff = -9;
-	  int indexhi = -9;
-	  int indexlo = -9;
-	  // --- B0
-	  if(B0)
-	    {
-	      eff = th1f_sensor_B0->GetBinContent(i+1);
-	      indexlo = th1f_eta_B0->GetXaxis()->FindBin(etalo);
-	      indexhi = th1f_eta_B0->GetXaxis()->FindBin(etahi);
-	      for(int j=indexlo; j<indexhi; j++) th1f_eta_B0->SetBinContent(j,eff);
-	    } // if B0
-	  // --- B1
-	  if(B1)
-	    {
-	      eff = th1f_sensor_B1->GetBinContent(i+1);
-	      indexlo = th1f_eta_B1->GetXaxis()->FindBin(etalo);
-	      indexhi = th1f_eta_B1->GetXaxis()->FindBin(etahi);
-	      for(int j=indexlo; j<indexhi; j++) th1f_eta_B1->SetBinContent(j,eff);
-	    } // if B1
-	  // --- B2
-	  if(B2)
-	    {
-	      eff = th1f_sensor_B2->GetBinContent(i+1);
-	      indexlo = th1f_eta_B2->GetXaxis()->FindBin(etalo);
-	      indexhi = th1f_eta_B2->GetXaxis()->FindBin(etahi);
-	      for(int j=indexlo; j<indexhi; j++) th1f_eta_B2->SetBinContent(j,eff);
-	    } // if B2
-	  // --- B3
-	  if(B3)
-	    {
-	      eff = th1f_sensor_B3->GetBinContent(i+1);
-	      indexlo = th1f_eta_B3->GetXaxis()->FindBin(etalo);
-	      indexhi = th1f_eta_B3->GetXaxis()->FindBin(etahi);
-	      for(int j=indexlo; j<indexhi; j++) th1f_eta_B3->SetBinContent(j,eff);
-	    } // if B3
-	} // sensor
     } // layer
 
 
@@ -291,8 +300,8 @@ void AngleMaps(bool verbose = false)
   // --- now write the relevant histograms to a file
   // -----------------------------------------------
 
-  TFile *file = new TFile("histograms.root","recreate");
-  file->cd();
+  TFile *outfile = new TFile("histograms.root","recreate");
+  outfile->cd();
   th1f_phi_B0->Write();
   th1f_phi_B1->Write();
   th1f_phi_B2->Write();
@@ -303,7 +312,7 @@ void AngleMaps(bool verbose = false)
   th1f_eta_B2->Write();
   th1f_eta_B3->Write();
   th1f_eta_ALL->Write();
-  file->Write();
-  file->Close();
+  outfile->Write();
+  outfile->Close();
 
 }
