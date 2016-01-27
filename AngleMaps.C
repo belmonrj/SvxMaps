@@ -311,7 +311,7 @@ void AngleMaps(bool verbose = false)
   TH1F *th1f_phi_ALL = (TH1F *)th1f_phi_B0->Clone("th1f_phi_ALL");
   th1f_phi_ALL->Multiply(th1f_phi_B1);
   th1f_phi_ALL->Multiply(th1f_phi_B2);
-  th1f_phi_ALL->Multiply(th1f_phi_B2);
+  th1f_phi_ALL->Multiply(th1f_phi_B3);
   th1f_phi_ALL->SetLineColor(kBlack);
   th1f_phi_ALL->Draw();
   c1->Print("Figures/phi_combined.png");
@@ -332,7 +332,7 @@ void AngleMaps(bool verbose = false)
   TH1F *th1f_eta_ALL = (TH1F *)th1f_eta_B0->Clone("th1f_eta_ALL");
   th1f_eta_ALL->Multiply(th1f_eta_B1);
   th1f_eta_ALL->Multiply(th1f_eta_B2);
-  th1f_eta_ALL->Multiply(th1f_eta_B2);
+  th1f_eta_ALL->Multiply(th1f_eta_B3);
   th1f_eta_ALL->SetLineColor(kBlack);
   th1f_eta_ALL->Draw();
   c1->Print("Figures/eta_combined.png");
