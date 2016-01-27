@@ -1,8 +1,38 @@
 const float pi = TMath::Pi();
 
 
+void GetAngleMaps();
+void GetAngleMaps(int);
+void GetAngleMaps(int, bool, bool, bool, bool);
 
-void AngleMaps(bool verbose = false)
+
+void AngleMaps()
+{
+
+  GetAngleMaps();
+  GetAngleMaps(423844);
+  GetAngleMaps(408644);
+
+}
+
+
+void GetAngleMaps()
+{
+
+  GetAngleMaps(415751,true,true,true,true);
+
+}
+
+
+void GetAngleMaps(int run)
+{
+
+  GetAngleMaps(run,true,true,true,true);
+
+}
+
+
+void GetAngleMaps(int run, bool doB0, bool doB1, bool doB2, bool doB3)
 {
 
   // -----------------------------------------------------------
@@ -30,41 +60,41 @@ void AngleMaps(bool verbose = false)
 
   TFile *file = TFile::Open("efficiencies_runs.root");
   // --- B0
-  TH2F *th2f_input_B0 = (TH2F *)file->Get("th2f_map_sensorXladder_B0_run415751");
-  TH1F *th1f_ladder_B0 = (TH1F *)th2f_input_B0->ProjectionY("th1f_ladder_B0");
-  TH1F *th1f_sensor_B0 = (TH1F *)th2f_input_B0->ProjectionX("th1f_sensor_B0");
+  TH2F *th2f_input_B0 = (TH2F *)file->Get(Form("th2f_map_sensorXladder_B0_run%d",run));
+  TH1F *th1f_ladder_B0 = (TH1F *)th2f_input_B0->ProjectionY(Form("th1f_ladder_B0_run%d",run));
+  TH1F *th1f_sensor_B0 = (TH1F *)th2f_input_B0->ProjectionX(Form("th1f_sensor_B0_run%d",run));
   th1f_ladder_B0->Scale(1.0/th2f_input_B0->GetNbinsX());
   th1f_sensor_B0->Scale(1.0/th2f_input_B0->GetNbinsY());
-  TH1F *th1f_phi_B0 = new TH1F("th1f_phi_B0","",400,-pi/2,3*pi/2);
-  TH1F *th1f_eta_B0 = new TH1F("th1f_eta_B0","",500,-2.5,2.5);
-  TH2F *th2f_phiz_B0 = new TH2F("th2f_phiz_B0","",400,-20,20,400,-pi/2,3*pi/2);
+  TH1F *th1f_phi_B0 = new TH1F(Form("th1f_phi_B0_run%d",run),"",400,-pi/2,3*pi/2);
+  TH1F *th1f_eta_B0 = new TH1F(Form("th1f_eta_B0_run%d",run),"",500,-2.5,2.5);
+  TH2F *th2f_phiz_B0 = new TH2F(Form("th2f_phiz_B0_run%d",run),"",400,-20,20,400,-pi/2,3*pi/2);
   // --- B1
-  TH2F *th2f_input_B1 = (TH2F *)file->Get("th2f_map_sensorXladder_B1_run415751");
-  TH1F *th1f_ladder_B1 = (TH1F *)th2f_input_B1->ProjectionY("th1f_ladder_B1");
-  TH1F *th1f_sensor_B1 = (TH1F *)th2f_input_B1->ProjectionX("th1f_sensor_B1");
+  TH2F *th2f_input_B1 = (TH2F *)file->Get(Form("th2f_map_sensorXladder_B1_run%d",run));
+  TH1F *th1f_ladder_B1 = (TH1F *)th2f_input_B1->ProjectionY(Form("th1f_ladder_B1_run%d",run));
+  TH1F *th1f_sensor_B1 = (TH1F *)th2f_input_B1->ProjectionX(Form("th1f_sensor_B1_run%d",run));
   th1f_ladder_B1->Scale(1.0/th2f_input_B1->GetNbinsX());
   th1f_sensor_B1->Scale(1.0/th2f_input_B1->GetNbinsY());
-  TH1F *th1f_phi_B1 = new TH1F("th1f_phi_B1","",400,-pi/2,3*pi/2);
-  TH1F *th1f_eta_B1 = new TH1F("th1f_eta_B1","",500,-2.5,2.5);
-  TH2F *th2f_phiz_B1 = new TH2F("th2f_phiz_B1","",400,-20,20,400,-pi/2,3*pi/2);
+  TH1F *th1f_phi_B1 = new TH1F(Form("th1f_phi_B1_run%d",run),"",400,-pi/2,3*pi/2);
+  TH1F *th1f_eta_B1 = new TH1F(Form("th1f_eta_B1_run%d",run),"",500,-2.5,2.5);
+  TH2F *th2f_phiz_B1 = new TH2F(Form("th2f_phiz_B1_run%d",run),"",400,-20,20,400,-pi/2,3*pi/2);
   // --- B2
-  TH2F *th2f_input_B2 = (TH2F *)file->Get("th2f_map_sensorXladder_B2_run415751");
-  TH1F *th1f_ladder_B2 = (TH1F *)th2f_input_B2->ProjectionY("th1f_ladder_B2");
-  TH1F *th1f_sensor_B2 = (TH1F *)th2f_input_B2->ProjectionX("th1f_sensor_B2");
+  TH2F *th2f_input_B2 = (TH2F *)file->Get(Form("th2f_map_sensorXladder_B2_run%d",run));
+  TH1F *th1f_ladder_B2 = (TH1F *)th2f_input_B2->ProjectionY(Form("th1f_ladder_B2_run%d",run));
+  TH1F *th1f_sensor_B2 = (TH1F *)th2f_input_B2->ProjectionX(Form("th1f_sensor_B2_run%d",run));
   th1f_ladder_B2->Scale(1.0/th2f_input_B2->GetNbinsX());
   th1f_sensor_B2->Scale(1.0/th2f_input_B2->GetNbinsY());
-  TH1F *th1f_phi_B2 = new TH1F("th1f_phi_B2","",400,-pi/2,3*pi/2);
-  TH1F *th1f_eta_B2 = new TH1F("th1f_eta_B2","",500,-2.5,2.5);
-  TH2F *th2f_phiz_B2 = new TH2F("th2f_phiz_B2","",400,-20,20,400,-pi/2,3*pi/2);
+  TH1F *th1f_phi_B2 = new TH1F(Form("th1f_phi_B2_run%d",run),"",400,-pi/2,3*pi/2);
+  TH1F *th1f_eta_B2 = new TH1F(Form("th1f_eta_B2_run%d",run),"",500,-2.5,2.5);
+  TH2F *th2f_phiz_B2 = new TH2F(Form("th2f_phiz_B2_run%d",run),"",400,-20,20,400,-pi/2,3*pi/2);
   // --- B3
-  TH2F *th2f_input_B3 = (TH2F *)file->Get("th2f_map_sensorXladder_B3_run415751");
-  TH1F *th1f_ladder_B3 = (TH1F *)th2f_input_B3->ProjectionY("th1f_ladder_B3");
-  TH1F *th1f_sensor_B3 = (TH1F *)th2f_input_B3->ProjectionX("th1f_sensor_B3");
+  TH2F *th2f_input_B3 = (TH2F *)file->Get(Form("th2f_map_sensorXladder_B3_run%d",run));
+  TH1F *th1f_ladder_B3 = (TH1F *)th2f_input_B3->ProjectionY(Form("th1f_ladder_B3_run%d",run));
+  TH1F *th1f_sensor_B3 = (TH1F *)th2f_input_B3->ProjectionX(Form("th1f_sensor_B3_run%d",run));
   th1f_ladder_B3->Scale(1.0/th2f_input_B3->GetNbinsX());
   th1f_sensor_B3->Scale(1.0/th2f_input_B3->GetNbinsY());
-  TH1F *th1f_phi_B3 = new TH1F("th1f_phi_B3","",400,-pi/2,3*pi/2);
-  TH1F *th1f_eta_B3 = new TH1F("th1f_eta_B3","",500,-2.5,2.5);
-  TH2F *th2f_phiz_B3 = new TH2F("th2f_phiz_B3","",400,-20,20,400,-pi/2,3*pi/2);
+  TH1F *th1f_phi_B3 = new TH1F(Form("th1f_phi_B3_run%d",run),"",400,-pi/2,3*pi/2);
+  TH1F *th1f_eta_B3 = new TH1F(Form("th1f_eta_B3_run%d",run),"",500,-2.5,2.5);
+  TH2F *th2f_phiz_B3 = new TH2F(Form("th2f_phiz_B3_run%d",run),"",400,-20,20,400,-pi/2,3*pi/2);
 
 
 
@@ -282,39 +312,41 @@ void AngleMaps(bool verbose = false)
   // --- individual figures
 
   th1f_phi_B0->Draw();
-  c1->Print("Figures/phi_single_B0.png");
+  c1->Print(Form("Figures/phi_single_B0_run%d.png",run));
 
   th1f_phi_B1->Draw();
-  c1->Print("Figures/phi_single_B1.png");
+  c1->Print(Form("Figures/phi_single_B1_run%d.png",run));
 
   th1f_phi_B2->Draw();
-  c1->Print("Figures/phi_single_B2.png");
+  c1->Print(Form("Figures/phi_single_B2_run%d.png",run));
 
   th1f_phi_B3->Draw();
-  c1->Print("Figures/phi_single_B3.png");
+  c1->Print(Form("Figures/phi_single_B3_run%d.png",run));
 
 
   th1f_eta_B0->Draw();
-  c1->Print("Figures/eta_single_B0.png");
+  c1->Print(Form("Figures/eta_single_B0_run%d.png",run));
 
   th1f_eta_B1->Draw();
-  c1->Print("Figures/eta_single_B1.png");
+  c1->Print(Form("Figures/eta_single_B1_run%d.png",run));
 
   th1f_eta_B2->Draw();
-  c1->Print("Figures/eta_single_B2.png");
+  c1->Print(Form("Figures/eta_single_B2_run%d.png",run));
 
   th1f_eta_B3->Draw();
-  c1->Print("Figures/eta_single_B3.png");
+  c1->Print(Form("Figures/eta_single_B3_run%d.png",run));
 
   // --- combined figures
 
-  TH1F *th1f_phi_ALL = (TH1F *)th1f_phi_B0->Clone("th1f_phi_ALL");
-  th1f_phi_ALL->Multiply(th1f_phi_B1);
-  th1f_phi_ALL->Multiply(th1f_phi_B2);
-  th1f_phi_ALL->Multiply(th1f_phi_B3);
+  TH1F *th1f_phi_ALL = new TH1F(Form("th1f_phi_ALL_run%d",run),"",400,-pi/2,3*pi/2);
+  for(int i=0; i<th1f_phi_ALL->GetNbinsX(); i++) th1f_phi_ALL->SetBinContent(i+1,1.0);
+  if(doB0) th1f_phi_ALL->Multiply(th1f_phi_B0);
+  if(doB1) th1f_phi_ALL->Multiply(th1f_phi_B1);
+  if(doB2) th1f_phi_ALL->Multiply(th1f_phi_B2);
+  if(doB3) th1f_phi_ALL->Multiply(th1f_phi_B3);
   th1f_phi_ALL->SetLineColor(kBlack);
   th1f_phi_ALL->Draw();
-  c1->Print("Figures/phi_combined.png");
+  c1->Print(Form("Figures/phi_combined_run%d.png",run));
 
   th1f_phi_B0->SetLineColor(kBlue);
   th1f_phi_B1->SetLineColor(kRed);
@@ -326,16 +358,17 @@ void AngleMaps(bool verbose = false)
   th1f_phi_B2->Draw("same");
   th1f_phi_B3->Draw("same");
   th1f_phi_ALL->Draw("same");
-  c1->Print("Figures/phi_ALL.png");
+  c1->Print(Form("Figures/phi_ALL_run%d.png",run));
 
 
-  TH1F *th1f_eta_ALL = (TH1F *)th1f_eta_B0->Clone("th1f_eta_ALL");
-  th1f_eta_ALL->Multiply(th1f_eta_B1);
-  th1f_eta_ALL->Multiply(th1f_eta_B2);
-  th1f_eta_ALL->Multiply(th1f_eta_B3);
-  th1f_eta_ALL->SetLineColor(kBlack);
+  TH1F *th1f_eta_ALL = new TH1F(Form("th1f_eta_ALL_run%d",run),"",500,-2.5,2.5);
+  for(int i=0; i<th1f_eta_ALL->GetNbinsX(); i++) th1f_eta_ALL->SetBinContent(i+1,1.0);
+  if(doB0) th1f_eta_ALL->Multiply(th1f_eta_B0);
+  if(doB1) th1f_eta_ALL->Multiply(th1f_eta_B1);
+  if(doB2) th1f_eta_ALL->Multiply(th1f_eta_B2);
+  if(doB3) th1f_eta_ALL->Multiply(th1f_eta_B3);
   th1f_eta_ALL->Draw();
-  c1->Print("Figures/eta_combined.png");
+  c1->Print(Form("Figures/eta_combined_run%d.png",run));
 
   th1f_eta_B0->SetLineColor(kBlue);
   th1f_eta_B1->SetLineColor(kRed);
@@ -347,24 +380,24 @@ void AngleMaps(bool verbose = false)
   th1f_eta_B2->Draw("same");
   th1f_eta_B3->Draw("same");
   th1f_eta_ALL->Draw("same");
-  c1->Print("Figures/eta_ALL.png");
+  c1->Print(Form("Figures/eta_ALL_run%d.png",run));
 
 
   th2f_phiz_B0->GetZaxis()->SetLimits(-0.001,1.001);
   th2f_phiz_B0->Draw("colz");
-  c1->Print("Figures/single_phiz_B0.png");
+  c1->Print(Form("Figures/single_phiz_B0_run%d.png",run));
 
   th2f_phiz_B1->GetZaxis()->SetLimits(-0.001,1.001);
   th2f_phiz_B1->Draw("colz");
-  c1->Print("Figures/single_phiz_B1.png");
+  c1->Print(Form("Figures/single_phiz_B1_run%d.png",run));
 
   th2f_phiz_B2->GetZaxis()->SetLimits(-0.001,1.001);
   th2f_phiz_B2->Draw("colz");
-  c1->Print("Figures/single_phiz_B2.png");
+  c1->Print(Form("Figures/single_phiz_B2_run%d.png",run));
 
   th2f_phiz_B3->GetZaxis()->SetLimits(-0.001,1.001);
   th2f_phiz_B3->Draw("colz");
-  c1->Print("Figures/single_phiz_B3.png");
+  c1->Print(Form("Figures/single_phiz_B3_run%d.png",run));
 
 
 
