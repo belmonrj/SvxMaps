@@ -104,6 +104,7 @@ void GetAngleMaps(int run, bool doB0, bool doB1, bool doB2, bool doB3)
 
   float RADIUS[4] = {2.63, 5.13, 11.77, 16.69}; // average radius for each layer
   float LENGTH[4] = {22.8, 22.8, 31.8,  38.2}; // total length in z for each layer
+  float ACTIVE[4] = {1.36, 1.36,  6.0,  6.0}; // active length in z for each chip (1.36 for B0, B1), sensor (5.56 for B0, B1 and 6.0 cm for B2 and B3)
   int   NOBINS[4] = {16,16,5,6}; // 4,4,5,6 means sensors, 16,16,5,6 means chips for pixels and sensors for strips
 
   float phiwidth[8] = {
@@ -207,7 +208,9 @@ void GetAngleMaps(int run, bool doB0, bool doB1, bool doB2, bool doB3)
 	      // ---
 	      float zlo = zmin + k*zwidth;
 	      float zhi = zmin + (k+1)*zwidth;
-	      float zce = zlo + zcenter;
+	      float zce = zlo + zcenter; // use total size to determine geometric center
+	      zlo = zce - ACTIVE[h]/2.0; // reassign with active area
+	      zhi = zce + ACTIVE[h]/2.0; // reassign with active area
 	      // ---
 	      float etalo = -log(tan(atan2(r,zlo)/2.0));
 	      float etahi = -log(tan(atan2(r,zhi)/2.0));
